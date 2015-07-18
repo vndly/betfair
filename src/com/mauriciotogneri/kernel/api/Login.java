@@ -41,19 +41,14 @@ public class Login
 
     public static class LoginResponse
     {
-        private String token = "";
-        private String product = "";
-        private String status = "";
-        private String error = "";
+        public String token = "";
+        public String product = "";
+        public String status = "";
+        public String error = "";
 
         public boolean isValid()
         {
             return status.equals("SUCCESS");
-        }
-
-        public String getToken()
-        {
-            return token;
         }
     }
 }

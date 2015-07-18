@@ -1,2 +1,2 @@
-# betfair
+# Betfair
 Betfair bot
