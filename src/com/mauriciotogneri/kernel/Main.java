@@ -66,18 +66,20 @@ public class Main
 
         if (true)
         {
-            ListEvents.Response listEventsResponse = getSoccerEvents(client, gson, appKey, sessionToken);
+            //ListEvents.Response listEventsResponse = getSoccerEvents(client, gson, appKey, sessionToken);
 
-            System.out.println(gson.toJson(listEventsResponse));
+            //System.out.println(gson.toJson(listEventsResponse));
 
-            processEvents(client, gson, appKey, sessionToken, listEventsResponse);
+            //processEvents(client, gson, appKey, sessionToken, listEventsResponse);
+
+            getEvents(client, gson, appKey, sessionToken);
         }
     }
 
     private ListEvents.Response getSoccerEvents(OkHttpClient client, Gson gson, String appKey, String sessionToken) throws IOException
     {
         MarketFilter.Builder marketFilter = new Builder();
-        marketFilter.setEventTypeIds(EventTypeEnum.SOCCER);
+        marketFilter.setEventTypeIds(EventTypeEnum.SOCCER.toString());
         marketFilter.setInPlayOnly(true);
 
         ListCallParameters parameters = new ListCallParameters(marketFilter.build());
@@ -101,6 +103,7 @@ public class Main
     {
         MarketFilter.Builder marketFilter = new Builder();
         marketFilter.setEventIds(eventId);
+        marketFilter.setMarketTypeCodes("MATCH_ODDS");
 
         ListMarketCatalogue.Parameters.Builder parameters = new ListMarketCatalogue.Parameters.Builder(marketFilter.build());
         parameters.setMarketProjection(MarketProjection.RUNNER_DESCRIPTION, MarketProjection.RUNNER_METADATA);
@@ -110,5 +113,23 @@ public class Main
         ListMarketCatalogue.Response response = listMarketCatalogue.execute(parameters.build());
 
         System.out.println(gson.toJson(response));
+    }
+
+    private void getEvents(OkHttpClient client, Gson gson, String appKey, String sessionToken) throws IOException
+    {
+        MarketFilter.Builder marketFilter = new Builder();
+        marketFilter.setEventTypeIds(EventTypeEnum.SOCCER.toString());
+        marketFilter.setInPlayOnly(true);
+        marketFilter.setMarketTypeCodes("MATCH_ODDS");
+
+        ListMarketCatalogue.Parameters.Builder parameters = new ListMarketCatalogue.Parameters.Builder(marketFilter.build());
+        parameters.setMarketProjection(MarketProjection.EVENT);
+        parameters.setMaxResults(1000);
+
+        ListMarketCatalogue listMarketCatalogue = new ListMarketCatalogue(client, gson, appKey, sessionToken);
+        ListMarketCatalogue.Response response = listMarketCatalogue.execute(parameters.build());
+
+        System.out.println(gson.toJson(response));
+        System.out.println(response.size());
     }
 }

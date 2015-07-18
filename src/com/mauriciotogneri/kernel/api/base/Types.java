@@ -1,6 +1,5 @@
 package com.mauriciotogneri.kernel.api.base;
 
-import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketBettingType;
 
 import java.util.ArrayList;
@@ -61,10 +60,10 @@ public class Types
         //public String marketStartTime = "";
         //public MarketDescription description = null;
         public double totalMatched = 0;
-        public List<RunnerCatalog> runners = new ArrayList<>();
+        //public List<RunnerCatalog> runners = new ArrayList<>();
         //public EventType eventType = null;
         //public Competition competition = null;
-        //public Event event = null;
+        public Event event = null;
     }
 
     public static class MarketDescription
@@ -157,16 +156,9 @@ public class Types
                 this.eventTypeIds = eventTypeIds;
             }
 
-            public void setEventTypeIds(EventTypeEnum... types)
+            public void setEventTypeIds(String... types)
             {
-                List<String> list = new ArrayList<>();
-
-                for (EventTypeEnum type : types)
-                {
-                    list.add(type.toString());
-                }
-
-                this.eventTypeIds = list;
+                this.eventTypeIds = new ArrayList<>(Arrays.asList(types));
             }
 
             public void setEventIds(List<String> eventIds)
@@ -222,6 +214,11 @@ public class Types
             public void setMarketTypeCodes(List<String> marketTypeCodes)
             {
                 this.marketTypeCodes = marketTypeCodes;
+            }
+
+            public void setMarketTypeCodes(String... codes)
+            {
+                this.marketTypeCodes = new ArrayList<>(Arrays.asList(codes));
             }
 
             public void setMarketStartTime(String marketStartTime)

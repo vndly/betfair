@@ -1,5 +1,6 @@
 package com.mauriciotogneri.kernel.api.base;
 
+@SuppressWarnings("unused")
 public class Enums
 {
     public enum EventTypeEnum
