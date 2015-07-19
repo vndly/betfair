@@ -1,13 +1,14 @@
 package com.mauriciotogneri.kernel.api;
 
-import com.google.gson.Gson;
 import com.mauriciotogneri.kernel.api.base.BaseRequest;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketProjection;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketSort;
+import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.ListCallParameters;
+import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.base.Types.MarketFilter;
-import com.squareup.okhttp.OkHttpClient;
+import com.mauriciotogneri.kernel.api.base.Types.MarketFilter.Builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,9 +17,9 @@ import java.util.List;
 
 public class ListMarketCatalogue extends BaseRequest<ListMarketCatalogue.Response, ListMarketCatalogue.Parameters>
 {
-    public ListMarketCatalogue(OkHttpClient client, Gson gson, String appKey, String sessionToken)
+    public ListMarketCatalogue(HttpClient httpClient, Session session)
     {
-        super(client, gson, appKey, sessionToken);
+        super(httpClient, session);
     }
 
     @Override
@@ -102,5 +103,20 @@ public class ListMarketCatalogue extends BaseRequest<ListMarketCatalogue.Respons
 
     public static class Response extends ArrayList<MarketCatalogue>
     {
+    }
+
+    public static ListMarketCatalogue.Response fromEventId(HttpClient httpClient, Session session, String eventId) throws IOException
+    {
+        MarketFilter.Builder marketFilter = new Builder();
+        marketFilter.setEventIds(eventId);
+        marketFilter.setMarketTypeCodes("MATCH_ODDS"); // TODO
+
+        ListMarketCatalogue.Parameters.Builder parameters = new ListMarketCatalogue.Parameters.Builder(marketFilter.build());
+        parameters.setMarketProjection(MarketProjection.MARKET_DESCRIPTION, MarketProjection.RUNNER_DESCRIPTION, MarketProjection.RUNNER_METADATA);
+        parameters.setMaxResults(1000);
+
+        ListMarketCatalogue listMarketCatalogue = new ListMarketCatalogue(httpClient, session);
+
+        return listMarketCatalogue.execute(parameters.build());
     }
 }

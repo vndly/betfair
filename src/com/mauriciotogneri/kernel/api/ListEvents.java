@@ -1,19 +1,22 @@
 package com.mauriciotogneri.kernel.api;
 
-import com.google.gson.Gson;
 import com.mauriciotogneri.kernel.api.base.BaseRequest;
+import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
+import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.ListCallParameters;
+import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.EventResult;
-import com.squareup.okhttp.OkHttpClient;
+import com.mauriciotogneri.kernel.api.base.Types.MarketFilter;
+import com.mauriciotogneri.kernel.api.base.Types.MarketFilter.Builder;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class ListEvents extends BaseRequest<ListEvents.Response, ListCallParameters>
 {
-    public ListEvents(OkHttpClient client, Gson gson, String appKey, String sessionToken)
+    public ListEvents(HttpClient httpClient, Session session)
     {
-        super(client, gson, appKey, sessionToken);
+        super(httpClient, session);
     }
 
     @Override
@@ -34,5 +37,18 @@ public class ListEvents extends BaseRequest<ListEvents.Response, ListCallParamet
 
     public static class Response extends ArrayList<EventResult>
     {
+    }
+
+    public static ListEvents.Response getSoccerEvents(HttpClient httpClient, Session session) throws IOException
+    {
+        MarketFilter.Builder marketFilter = new Builder();
+        marketFilter.setEventTypeIds(EventTypeEnum.SOCCER.toString());
+        marketFilter.setInPlayOnly(true);
+
+        ListCallParameters parameters = new ListCallParameters(marketFilter.build());
+
+        ListEvents listEvents = new ListEvents(httpClient, session);
+
+        return listEvents.execute(parameters);
     }
 }

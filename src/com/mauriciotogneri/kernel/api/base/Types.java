@@ -1,7 +1,5 @@
 package com.mauriciotogneri.kernel.api.base;
 
-import com.mauriciotogneri.kernel.api.base.Enums.MarketBettingType;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -56,34 +54,34 @@ public class Types
     public static class MarketCatalogue
     {
         public String marketId = "";
-        public String marketName = "";
+        //public String marketName = "";
         //public String marketStartTime = "";
-        //public MarketDescription description = null;
-        public double totalMatched = 0;
-        //public List<RunnerCatalog> runners = new ArrayList<>();
+        public MarketDescription description = null;
+        //public double totalMatched = 0;
+        public List<RunnerCatalog> runners = new ArrayList<>();
         //public EventType eventType = null;
         //public Competition competition = null;
-        public Event event = null;
+        //public Event event = null;
     }
 
     public static class MarketDescription
     {
-        public boolean persistenceEnabled = false;
-        public boolean bspMarket = false;
-        public String marketTime = "";
-        public String suspendTime = "";
-        public String settleTime = "";
-        public MarketBettingType bettingType = null;
-        public boolean turnInPlayEnabled = false;
+        //public boolean persistenceEnabled = false;
+        //public boolean bspMarket = false;
+        //public String marketTime = "";
+        //public String suspendTime = "";
+        //public String settleTime = "";
+        //public MarketBettingType bettingType = null;
+        //public boolean turnInPlayEnabled = false;
         public String marketType = "";
-        public String regulator = "";
-        public double marketBaseRate = 0;
-        public boolean discountAllowed = false;
-        public String wallet = "";
-        public String rules = "";
-        public boolean rulesHasDate = false;
-        public double eachWayDivisor = 0;
-        public String clarifications = "";
+        //public String regulator = "";
+        //public double marketBaseRate = 0;
+        //public boolean discountAllowed = false;
+        //public String wallet = "";
+        //public String rules = "";
+        //public boolean rulesHasDate = false;
+        //public double eachWayDivisor = 0;
+        //public String clarifications = "";
     }
 
     public static class MarketFilter
