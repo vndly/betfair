@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel;
 
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
+import com.mauriciotogneri.kernel.api.base.Types.EventResult;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListEvents;
 import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
@@ -38,10 +39,10 @@ public class Main
 
     private void run(HttpClient httpClient, String username, String password, String appKey) throws IOException
     {
-        //Login login = new Login(client, gson);
+        //Login login = new Login(httpClient);
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "eWvVSPMj/RZNYoRlDGoCMs81C/igNjwWvhubbxRtWzk=");
+        Session session = new Session(appKey, "uHkgiyPrfKvS28q69Dj0+HSz3ZmYtUFqVJVYhTEzjWE=");
 
         //KeepAlive keepAlive = new KeepAlive(httpClient);
         //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
@@ -61,9 +62,14 @@ public class Main
     {
         if (!events.isEmpty())
         {
-            String eventId = events.get(0).event.id;
+            //String eventId = events.get(0).event.id;
 
-            processEvent(httpClient, session, eventId);
+            //processEvent(httpClient, session, eventId);
+
+            for (EventResult eventResult : events)
+            {
+                processEvent(httpClient, session, eventResult.event.id);
+            }
         }
     }
 
@@ -75,13 +81,13 @@ public class Main
 
         for (MarketCatalogue marketCatalogue : response)
         {
-            processMarket(session, marketCatalogue);
+            processMarket(session, eventId, marketCatalogue);
         }
     }
 
-    private void processMarket(Session session, MarketCatalogue marketCatalogue)
+    private void processMarket(Session session, String eventId, MarketCatalogue marketCatalogue)
     {
-        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, marketCatalogue);
+        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, eventId, marketCatalogue);
         marketAnalyzer.start();
     }
 }

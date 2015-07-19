@@ -59,6 +59,11 @@ public class Types
         public ExchangePrices ex = null;
         //public List<Object> orders = new ArrayList<>();
         //public List<Object> matches = new ArrayList<>();
+
+        public boolean isActive()
+        {
+            return (status != null) && (status == RunnerStatus.ACTIVE);
+        }
     }
 
     public static class PriceSize
@@ -81,6 +86,68 @@ public class Types
         public List<PriceSize> availableToBack = new ArrayList<>();
         public List<PriceSize> availableToLay = new ArrayList<>();
         public List<PriceSize> tradedVolume = new ArrayList<>();
+
+        public double getMinimumPrice()
+        {
+            double result = 0;
+            double min = Double.MAX_VALUE;
+
+            for (PriceSize priceSize : availableToBack)
+            {
+                if (priceSize.price < min)
+                {
+                    min = priceSize.price;
+                    result = priceSize.price;
+                }
+            }
+
+            return result;
+        }
+
+        public double getMaximumPrice()
+        {
+            double result = 0;
+            double max = Double.MIN_VALUE;
+
+            for (PriceSize priceSize : availableToBack)
+            {
+                if (priceSize.price > max)
+                {
+                    max = priceSize.price;
+                    result = priceSize.price;
+                }
+            }
+
+            return result;
+        }
+
+        public double getAveragePrice()
+        {
+            double sum = 0;
+            double length = availableToBack.size();
+
+            for (PriceSize priceSize : availableToBack)
+            {
+                sum += priceSize.price;
+            }
+
+            return (length == 0) ? 0 : (sum / length);
+        }
+
+        public double aaa()
+        {
+            double result = 1.001;
+
+            for (PriceSize priceSize : availableToBack)
+            {
+                if (priceSize.price > result)
+                {
+                    result = priceSize.price;
+                }
+            }
+
+            return result;
+        }
     }
 
     public static class RunnerCatalog
