@@ -9,12 +9,12 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 
-public abstract class BaseRequest<T, P>
+public abstract class BettingRequest<T, P>
 {
     private final HttpClient httpClient;
     private final Session session;
 
-    public BaseRequest(HttpClient httpClient, Session session)
+    public BettingRequest(HttpClient httpClient, Session session)
     {
         this.httpClient = httpClient;
         this.session = session;

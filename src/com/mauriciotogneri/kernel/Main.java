@@ -1,9 +1,9 @@
 package com.mauriciotogneri.kernel;
 
-import com.mauriciotogneri.kernel.api.ListEvents;
-import com.mauriciotogneri.kernel.api.ListMarketCatalogue;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
+import com.mauriciotogneri.kernel.api.betting.ListEvents;
+import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,6 +40,9 @@ public class Main
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
         Session session = new Session(appKey, "eWvVSPMj/RZNYoRlDGoCMs81C/igNjwWvhubbxRtWzk=");
+
+        //KeepAlive keepAlive = new KeepAlive(httpClient);
+        //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
 
         if (true)
         {

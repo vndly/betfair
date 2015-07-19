@@ -1,6 +1,6 @@
-package com.mauriciotogneri.kernel.api;
+package com.mauriciotogneri.kernel.api.betting;
 
-import com.mauriciotogneri.kernel.api.base.BaseRequest;
+import com.mauriciotogneri.kernel.api.base.BettingRequest;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketProjection;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketSort;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
@@ -9,13 +9,15 @@ import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.base.Types.MarketFilter;
 import com.mauriciotogneri.kernel.api.base.Types.MarketFilter.Builder;
+import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue.Parameters;
+import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ListMarketCatalogue extends BaseRequest<ListMarketCatalogue.Response, ListMarketCatalogue.Parameters>
+public class ListMarketCatalogue extends BettingRequest<Response, Parameters>
 {
     public ListMarketCatalogue(HttpClient httpClient, Session session)
     {

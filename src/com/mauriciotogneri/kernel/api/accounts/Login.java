@@ -1,8 +1,7 @@
-package com.mauriciotogneri.kernel.api;
+package com.mauriciotogneri.kernel.api.accounts;
 
-import com.google.gson.Gson;
+import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
@@ -10,13 +9,11 @@ import java.io.IOException;
 
 public class Login
 {
-    private final OkHttpClient client;
-    private final Gson gson;
+    private final HttpClient httpClient;
 
-    public Login(OkHttpClient client, Gson gson)
+    public Login(HttpClient httpClient)
     {
-        this.client = client;
-        this.gson = gson;
+        this.httpClient = httpClient;
     }
 
     public LoginResponse execute(String username, String password, String appKey) throws IOException
@@ -34,9 +31,9 @@ public class Login
 
         builder.post(parameters.build());
 
-        Response response = client.newCall(builder.build()).execute();
+        Response response = httpClient.client.newCall(builder.build()).execute();
 
-        return gson.fromJson(response.body().charStream(), LoginResponse.class);
+        return httpClient.gson.fromJson(response.body().charStream(), LoginResponse.class);
     }
 
     public static class LoginResponse

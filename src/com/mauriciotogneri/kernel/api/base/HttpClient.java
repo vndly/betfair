@@ -7,6 +7,7 @@ import com.mauriciotogneri.kernel.Constants.Debug.Http;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
 
 import java.io.IOException;
@@ -52,9 +53,14 @@ public class HttpClient
                     if (Http.PRINT_PARAMETERS)
                     {
                         Buffer buffer = new Buffer();
-                        request.body().writeTo(buffer);
+                        RequestBody requestBody = request.body();
 
-                        System.out.println(String.format("%s\n", buffer.readUtf8()));
+                        if (requestBody != null)
+                        {
+                            requestBody.writeTo(buffer);
+
+                            System.out.println(String.format("%s\n", buffer.readUtf8()));
+                        }
                     }
 
                     Response response = chain.proceed(request);
