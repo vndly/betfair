@@ -30,14 +30,10 @@ public class ListMarketCatalogue extends BettingRequest<Response, Parameters>
         return Response.class;
     }
 
-    public Response execute() throws IOException
+    @Override
+    protected String getMethod()
     {
-        return execute(new ListMarketCatalogue.Parameters());
-    }
-
-    public Response execute(ListMarketCatalogue.Parameters parameters) throws IOException
-    {
-        return execute("listMarketCatalogue", parameters);
+        return "listMarketCatalogue";
     }
 
     public static class Parameters extends ListCallParameters
@@ -107,18 +103,26 @@ public class ListMarketCatalogue extends BettingRequest<Response, Parameters>
     {
     }
 
-    public static ListMarketCatalogue.Response fromEventId(HttpClient httpClient, Session session, String eventId) throws IOException
+    public static ListMarketCatalogue getRequest(HttpClient httpClient, Session session, String eventId, String... marketTypes) throws IOException
     {
         MarketFilter.Builder marketFilter = new Builder();
         marketFilter.setEventIds(eventId);
-        marketFilter.setMarketTypeCodes("MATCH_ODDS"); // TODO
+        marketFilter.setMarketTypeCodes(marketTypes);
 
         ListMarketCatalogue.Parameters.Builder parameters = new ListMarketCatalogue.Parameters.Builder(marketFilter.build());
         parameters.setMarketProjection(MarketProjection.MARKET_DESCRIPTION, MarketProjection.RUNNER_DESCRIPTION, MarketProjection.RUNNER_METADATA);
         parameters.setMaxResults(1000);
 
         ListMarketCatalogue listMarketCatalogue = new ListMarketCatalogue(httpClient, session);
+        listMarketCatalogue.setParameters(parameters.build());
 
-        return listMarketCatalogue.execute(parameters.build());
+        return listMarketCatalogue;
+    }
+
+    public static ListMarketCatalogue.Response get(HttpClient httpClient, Session session, String eventId, String... marketTypes) throws IOException
+    {
+        ListMarketCatalogue listMarketCatalogue = getRequest(httpClient, session, eventId, marketTypes);
+
+        return listMarketCatalogue.execute();
     }
 }

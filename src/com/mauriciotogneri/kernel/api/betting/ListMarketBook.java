@@ -27,9 +27,10 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
         return Response.class;
     }
 
-    public Response execute(ListMarketBook.Parameters parameters) throws IOException
+    @Override
+    protected String getMethod()
     {
-        return execute("listMarketBook", parameters);
+        return "listMarketBook";
     }
 
     public static class Parameters
@@ -90,7 +91,7 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
     {
     }
 
-    public static MarketBook fromMarketId(HttpClient httpClient, Session session, String marketId) throws IOException
+    public static ListMarketBook getRequest(HttpClient httpClient, Session session, String marketId) throws IOException
     {
         PriceProjection priceProjection = new PriceProjection(PriceData.EX_ALL_OFFERS);
 
@@ -98,8 +99,16 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
         parameters.setPriceProjection(priceProjection);
 
         ListMarketBook listMarketCatalogue = new ListMarketBook(httpClient, session);
+        listMarketCatalogue.setParameters(parameters.build());
 
-        ListMarketBook.Response response = listMarketCatalogue.execute(parameters.build());
+        return listMarketCatalogue;
+    }
+
+    public static MarketBook get(HttpClient httpClient, Session session, String marketId) throws IOException
+    {
+        ListMarketBook listMarketCatalogue = getRequest(httpClient, session, marketId);
+
+        ListMarketBook.Response response = listMarketCatalogue.execute();
 
         return response.isEmpty() ? null : response.get(0);
     }

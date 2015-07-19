@@ -13,6 +13,7 @@ public abstract class BettingRequest<T, P>
 {
     private final HttpClient httpClient;
     private final Session session;
+    private P parameters;
 
     public BettingRequest(HttpClient httpClient, Session session)
     {
@@ -22,10 +23,17 @@ public abstract class BettingRequest<T, P>
 
     protected abstract Class<T> getClassType();
 
-    public T execute(String method, P parameters) throws IOException
+    protected abstract String getMethod();
+
+    public synchronized void setParameters(P parameters)
+    {
+        this.parameters = parameters;
+    }
+
+    private synchronized T executeRequest(P parameters) throws IOException
     {
         Request.Builder builder = new Request.Builder();
-        builder.url("https://api.betfair.com/exchange/betting/rest/v1.0/" + method + "/");
+        builder.url("https://api.betfair.com/exchange/betting/rest/v1.0/" + getMethod() + "/");
 
         builder.addHeader("X-Application", session.appKey);
         builder.addHeader("X-Authentication", session.sessionToken);
@@ -51,8 +59,13 @@ public abstract class BettingRequest<T, P>
         return httpClient.gson.fromJson(json, getClassType());
     }
 
-    public T execute(String method) throws IOException
+    public synchronized T execute(P parameters) throws IOException
     {
-        return execute(method, null);
+        return executeRequest(parameters);
+    }
+
+    public synchronized T execute() throws IOException
+    {
+        return executeRequest(parameters);
     }
 }

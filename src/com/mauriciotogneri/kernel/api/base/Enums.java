@@ -5,9 +5,9 @@ public class Enums
 {
     public enum EventTypeEnum
     {
-        SOCCER("1"), TENNIS("2"), GOLF("3");
+        SOCCER("1"), TENNIS("2"), GOLF("3"); // TODO
 
-        private String id;
+        private final String id;
 
         EventTypeEnum(String id)
         {
@@ -17,6 +17,23 @@ public class Enums
         public String toString()
         {
             return id;
+        }
+    }
+
+    public enum MarketTypeEnum
+    {
+        MATCH_ODDS("MATCH_ODDS"), OVER_UNDER_25("OVER_UNDER_25"), NEXT_GOAL("NEXT_GOAL"); // TODO
+
+        private final String code;
+
+        MarketTypeEnum(String code)
+        {
+            this.code = code;
+        }
+
+        public String toString()
+        {
+            return code;
         }
     }
 

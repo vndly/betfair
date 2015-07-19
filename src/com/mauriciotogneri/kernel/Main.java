@@ -1,8 +1,10 @@
 package com.mauriciotogneri.kernel;
 
+import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
+import com.mauriciotogneri.kernel.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
-import com.mauriciotogneri.kernel.api.base.Types.EventResult;
+import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListEvents;
 import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
@@ -49,7 +51,7 @@ public class Main
 
         if (true)
         {
-            ListEvents.Response listEventsResponse = ListEvents.getSoccerEvents(httpClient, session);
+            ListEvents.Response listEventsResponse = ListEvents.get(httpClient, session, EventTypeEnum.SOCCER.toString());
 
             System.out.println(httpClient.gson.toJson(listEventsResponse));
             System.out.println(listEventsResponse.size());
@@ -62,32 +64,30 @@ public class Main
     {
         if (!events.isEmpty())
         {
-            //String eventId = events.get(0).event.id;
+            processEvent(httpClient, session, events.get(0).event);
 
-            //processEvent(httpClient, session, eventId);
-
-            for (EventResult eventResult : events)
-            {
-                processEvent(httpClient, session, eventResult.event.id);
-            }
+            //            for (EventResult eventResult : events)
+            //            {
+            //                processEvent(httpClient, session, eventResult.event);
+            //            }
         }
     }
 
-    private void processEvent(HttpClient httpClient, Session session, String eventId) throws IOException
+    private void processEvent(HttpClient httpClient, Session session, Event event) throws IOException
     {
-        ListMarketCatalogue.Response response = ListMarketCatalogue.fromEventId(httpClient, session, eventId);
+        ListMarketCatalogue.Response response = ListMarketCatalogue.get(httpClient, session, event.id, MarketTypeEnum.MATCH_ODDS.toString());
 
         System.out.println(httpClient.gson.toJson(response));
 
         for (MarketCatalogue marketCatalogue : response)
         {
-            processMarket(session, eventId, marketCatalogue);
+            processMarket(session, event, marketCatalogue);
         }
     }
 
-    private void processMarket(Session session, String eventId, MarketCatalogue marketCatalogue)
+    private void processMarket(Session session, Event event, MarketCatalogue marketCatalogue)
     {
-        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, eventId, marketCatalogue);
+        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, event, marketCatalogue);
         marketAnalyzer.start();
     }
 }
