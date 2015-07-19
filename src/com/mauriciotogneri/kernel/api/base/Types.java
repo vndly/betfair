@@ -1,5 +1,9 @@
 package com.mauriciotogneri.kernel.api.base;
 
+import com.mauriciotogneri.kernel.api.base.Enums.MarketStatus;
+import com.mauriciotogneri.kernel.api.base.Enums.PriceData;
+import com.mauriciotogneri.kernel.api.base.Enums.RunnerStatus;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -42,6 +46,43 @@ public class Types
         public String name = "";
     }
 
+    public static class Runner
+    {
+        public long selectionId = 0;
+        public double handicap = 0;
+        public RunnerStatus status = null;
+        public double adjustmentFactor = 0;
+        public double lastPriceTraded = 0;
+        public double totalMatched = 0;
+        public String removalDate = "";
+        public StartingPrices sp = null;
+        public ExchangePrices ex = null;
+        //public List<Object> orders = new ArrayList<>();
+        //public List<Object> matches = new ArrayList<>();
+    }
+
+    public static class PriceSize
+    {
+        public double price = 0;
+        public double size = 0;
+    }
+
+    public static class StartingPrices
+    {
+        public double nearPrice = 0;
+        public double farPrice = 0;
+        public List<PriceSize> backStakeTaken = new ArrayList<>();
+        public List<PriceSize> layLiabilityTaken = new ArrayList<>();
+        public double actualSP = 0;
+    }
+
+    public static class ExchangePrices
+    {
+        public List<PriceSize> availableToBack = new ArrayList<>();
+        public List<PriceSize> availableToLay = new ArrayList<>();
+        public List<PriceSize> tradedVolume = new ArrayList<>();
+    }
+
     public static class RunnerCatalog
     {
         public long selectionId = 0;
@@ -51,6 +92,28 @@ public class Types
         public Map<String, String> metadata = new HashMap<>();
     }
 
+    public static class PriceProjection
+    {
+        public List<PriceData> priceData;
+        public Object exBestOffersOverrides; // TODO
+        public boolean virtualise;
+        public boolean rolloverStakes;
+
+        public PriceProjection()
+        {
+        }
+
+        public PriceProjection(List<PriceData> priceData)
+        {
+            this.priceData = priceData;
+        }
+
+        public PriceProjection(PriceData... data)
+        {
+            this.priceData = new ArrayList<>(Arrays.asList(data));
+        }
+    }
+
     public static class MarketCatalogue
     {
         public String marketId = "";
@@ -58,10 +121,31 @@ public class Types
         //public String marketStartTime = "";
         public MarketDescription description = null;
         //public double totalMatched = 0;
-        public List<RunnerCatalog> runners = new ArrayList<>();
+        //public List<RunnerCatalog> runners = new ArrayList<>();
         //public EventType eventType = null;
         //public Competition competition = null;
         //public Event event = null;
+    }
+
+    public static class MarketBook
+    {
+        public String marketId = "";
+        public boolean isMarketDataDelayed = false;
+        public MarketStatus status;
+        public int betDelay = 0;
+        public boolean bspReconciled = false;
+        public boolean complete = false;
+        public boolean inplay = false;
+        public int numberOfWinners = 0;
+        public int numberOfRunners = 0;
+        public int numberOfActiveRunners = 0;
+        public String lastMatchTime = "";
+        public double totalMatched = 0;
+        public double totalAvailable = 0;
+        public boolean crossMatching = false;
+        public boolean runnersVoidable = false;
+        public long version = 0;
+        public List<Runner> runners = new ArrayList<>();
     }
 
     public static class MarketDescription

@@ -2,8 +2,10 @@ package com.mauriciotogneri.kernel;
 
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
+import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListEvents;
 import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
+import com.mauriciotogneri.kernel.api.processors.MarketAnalyzer;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,5 +72,16 @@ public class Main
         ListMarketCatalogue.Response response = ListMarketCatalogue.fromEventId(httpClient, session, eventId);
 
         System.out.println(httpClient.gson.toJson(response));
+
+        for (MarketCatalogue marketCatalogue : response)
+        {
+            processMarket(session, marketCatalogue);
+        }
+    }
+
+    private void processMarket(Session session, MarketCatalogue marketCatalogue)
+    {
+        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, marketCatalogue);
+        marketAnalyzer.start();
     }
 }
