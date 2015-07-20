@@ -1,14 +1,9 @@
 package com.mauriciotogneri.kernel;
 
 import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
-import com.mauriciotogneri.kernel.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
-import com.mauriciotogneri.kernel.api.base.Types.Event;
-import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
-import com.mauriciotogneri.kernel.api.betting.ListEvents;
-import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
-import com.mauriciotogneri.kernel.api.processors.MarketAnalyzer;
+import com.mauriciotogneri.kernel.monitors.EventMonitor;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -44,50 +39,12 @@ public class Main
         //Login login = new Login(httpClient);
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "uHkgiyPrfKvS28q69Dj0+HSz3ZmYtUFqVJVYhTEzjWE=");
+        Session session = new Session(appKey, "+YmMV73iPos3p5wwmKWXA64EiX86XX3r4KPrxSLZpHQ=");
 
         //KeepAlive keepAlive = new KeepAlive(httpClient);
         //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
 
-        if (true)
-        {
-            ListEvents.Response listEventsResponse = ListEvents.get(httpClient, session, EventTypeEnum.SOCCER.toString());
-
-            System.out.println(httpClient.gson.toJson(listEventsResponse));
-            System.out.println(listEventsResponse.size());
-
-            processEvents(httpClient, session, listEventsResponse);
-        }
-    }
-
-    private void processEvents(HttpClient httpClient, Session session, ListEvents.Response events) throws IOException
-    {
-        if (!events.isEmpty())
-        {
-            processEvent(httpClient, session, events.get(0).event);
-
-            //            for (EventResult eventResult : events)
-            //            {
-            //                processEvent(httpClient, session, eventResult.event);
-            //            }
-        }
-    }
-
-    private void processEvent(HttpClient httpClient, Session session, Event event) throws IOException
-    {
-        ListMarketCatalogue.Response response = ListMarketCatalogue.get(httpClient, session, event.id, MarketTypeEnum.MATCH_ODDS.toString());
-
-        System.out.println(httpClient.gson.toJson(response));
-
-        for (MarketCatalogue marketCatalogue : response)
-        {
-            processMarket(session, event, marketCatalogue);
-        }
-    }
-
-    private void processMarket(Session session, Event event, MarketCatalogue marketCatalogue)
-    {
-        MarketAnalyzer marketAnalyzer = new MarketAnalyzer(HttpClient.getDefault(), session, event, marketCatalogue);
-        marketAnalyzer.start();
+        EventMonitor eventMonitor = new EventMonitor(httpClient, session, EventTypeEnum.SOCCER.toString());
+        eventMonitor.start();
     }
 }

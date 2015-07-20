@@ -1,4 +1,5 @@
 /out
 /.idea
+/logs
 Betfair.iml
 config.properties

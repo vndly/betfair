@@ -1,7 +1,5 @@
 package com.mauriciotogneri.kernel.api.base;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mauriciotogneri.kernel.Constants.Debug;
 import com.mauriciotogneri.kernel.Constants.Debug.Http;
 import com.squareup.okhttp.Interceptor;
@@ -17,12 +15,10 @@ import okio.Buffer;
 public class HttpClient
 {
     public final OkHttpClient client;
-    public final Gson gson;
 
-    public HttpClient(OkHttpClient client, Gson gson)
+    public HttpClient(OkHttpClient client)
     {
         this.client = client;
-        this.gson = gson;
     }
 
     public static HttpClient getDefault()
@@ -82,8 +78,6 @@ public class HttpClient
             });
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        return new HttpClient(client, gson);
+        return new HttpClient(client);
     }
 }

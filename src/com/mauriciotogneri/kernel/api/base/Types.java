@@ -3,6 +3,7 @@ package com.mauriciotogneri.kernel.api.base;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketStatus;
 import com.mauriciotogneri.kernel.api.base.Enums.PriceData;
 import com.mauriciotogneri.kernel.api.base.Enums.RunnerStatus;
+import com.mauriciotogneri.kernel.utils.NumberFormatter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +102,7 @@ public class Types
                 }
             }
 
-            return result;
+            return NumberFormatter.round(result, 3);
         }
 
         public double getMaximumPrice()
@@ -118,7 +119,7 @@ public class Types
                 }
             }
 
-            return result;
+            return NumberFormatter.round(result, 3);
         }
 
         public double getAveragePrice()
@@ -131,22 +132,7 @@ public class Types
                 sum += priceSize.price;
             }
 
-            return (length == 0) ? 0 : (sum / length);
-        }
-
-        public double aaa()
-        {
-            double result = 1.001;
-
-            for (PriceSize priceSize : availableToBack)
-            {
-                if (priceSize.price > result)
-                {
-                    result = priceSize.price;
-                }
-            }
-
-            return result;
+            return NumberFormatter.round((length == 0) ? 0 : (sum / length), 3);
         }
     }
 

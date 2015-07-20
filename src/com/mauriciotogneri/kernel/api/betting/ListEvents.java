@@ -38,9 +38,8 @@ public class ListEvents extends BettingRequest<Response, ListCallParameters>
     public static ListEvents getRequest(HttpClient httpClient, Session session, String... eventTypes) throws IOException
     {
         MarketFilter.Builder marketFilter = new Builder();
-        //marketFilter.setEventTypeIds(eventTypes);
-        //marketFilter.setInPlayOnly(true);
-        marketFilter.setEventIds("27490788");
+        marketFilter.setEventTypeIds(eventTypes);
+        marketFilter.setInPlayOnly(true);
 
         ListCallParameters parameters = new ListCallParameters(marketFilter.build());
 
@@ -48,12 +47,5 @@ public class ListEvents extends BettingRequest<Response, ListCallParameters>
         listEvents.setParameters(parameters);
 
         return listEvents;
-    }
-
-    public static ListEvents.Response get(HttpClient httpClient, Session session, String... evenTypes) throws IOException
-    {
-        ListEvents listEvents = getRequest(httpClient, session, evenTypes);
-
-        return listEvents.execute();
     }
 }

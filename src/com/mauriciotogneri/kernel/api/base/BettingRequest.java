@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel.api.base;
 
 import com.mauriciotogneri.kernel.Constants.Debug;
 import com.mauriciotogneri.kernel.Constants.Debug.Http;
+import com.mauriciotogneri.kernel.utils.JsonUtils;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
@@ -43,7 +44,7 @@ public abstract class BettingRequest<T, P>
         if (parameters != null)
         {
             MediaType JSON = MediaType.parse("application/json");
-            RequestBody requestBody = RequestBody.create(JSON, httpClient.gson.toJson(parameters));
+            RequestBody requestBody = RequestBody.create(JSON, JsonUtils.toJson(parameters));
             builder.post(requestBody);
         }
 
@@ -56,7 +57,7 @@ public abstract class BettingRequest<T, P>
             System.out.println(json + "\n");
         }
 
-        return httpClient.gson.fromJson(json, getClassType());
+        return JsonUtils.fromJson(json, getClassType());
     }
 
     public synchronized T execute(P parameters) throws IOException

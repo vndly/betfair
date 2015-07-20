@@ -4,7 +4,7 @@ public class Constants
 {
     public static class Debug
     {
-        public static final boolean ENABLE_LOGS = false;
+        public static final boolean ENABLE_LOGS = true;
 
         public static class Http
         {
