@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel.api.base;
 
 import com.mauriciotogneri.kernel.api.base.Enums.MarketStatus;
 import com.mauriciotogneri.kernel.api.base.Enums.PriceData;
+import com.mauriciotogneri.kernel.api.base.Enums.RollupModel;
 import com.mauriciotogneri.kernel.api.base.Enums.RunnerStatus;
 import com.mauriciotogneri.kernel.utils.NumberFormatter;
 
@@ -148,7 +149,7 @@ public class Types
     public static class PriceProjection
     {
         public List<PriceData> priceData;
-        public Object exBestOffersOverrides; // TODO
+        public ExBestOffersOverrides exBestOffersOverrides;
         public boolean virtualise;
         public boolean rolloverStakes;
 
@@ -165,6 +166,15 @@ public class Types
         {
             this.priceData = new ArrayList<>(Arrays.asList(data));
         }
+    }
+
+    public static class ExBestOffersOverrides
+    {
+        public Integer bestPricesDepth;
+        public RollupModel rollupModel;
+        public Integer rollupLimit;
+        public Double rollupLiabilityThreshold;
+        public Integer rollupLiabilityFactor;
     }
 
     public static class MarketCatalogue

@@ -15,13 +15,13 @@ import java.util.Set;
 
 public class EventMonitor extends AbstractMonitor
 {
-    private final String[] eventType;
+    private final String eventType;
     private ListEvents listEvents;
     private final Set<String> eventsSet = new HashSet<>();
 
     private static final int WAITING_TIME = 60 * 1000; // one minute (in milliseconds)
 
-    public EventMonitor(HttpClient httpClient, Session session, String... eventType)
+    public EventMonitor(HttpClient httpClient, Session session, String eventType)
     {
         super(httpClient, session);
 
@@ -76,21 +76,23 @@ public class EventMonitor extends AbstractMonitor
             {
                 addEvent(event.id);
 
-                EventProcessor eventProcessor = new EventProcessor(this, event);
-                eventProcessor.process(httpClient, session);
+                String folderPath = "logs/events/" + eventType + "/" + event.id;
 
-                logEvent(event);
+                EventProcessor eventProcessor = new EventProcessor(this, event);
+                eventProcessor.process(HttpClient.getDefault(), session, folderPath);
+
+                logEvent(event, folderPath);
             }
         }
 
         return true;
     }
 
-    private void logEvent(Event event)
+    private void logEvent(Event event, String folderPath)
     {
         try
         {
-            IoUtils.writeToFile("logs/events/" + event.id + ".log", JsonUtils.toJson(event));
+            IoUtils.writeToFile(folderPath + "/info.log", JsonUtils.toJson(event));
         }
         catch (IOException e)
         {

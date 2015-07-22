@@ -6,6 +6,7 @@ import com.mauriciotogneri.kernel.api.base.Enums.OrderProjection;
 import com.mauriciotogneri.kernel.api.base.Enums.PriceData;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
+import com.mauriciotogneri.kernel.api.base.Types.ExBestOffersOverrides;
 import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.PriceProjection;
 
@@ -93,7 +94,9 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
 
     public static ListMarketBook getRequest(HttpClient httpClient, Session session, String marketId) throws IOException
     {
-        PriceProjection priceProjection = new PriceProjection(PriceData.EX_ALL_OFFERS);
+        PriceProjection priceProjection = new PriceProjection(PriceData.EX_BEST_OFFERS);
+        priceProjection.exBestOffersOverrides = new ExBestOffersOverrides();
+        priceProjection.exBestOffersOverrides.bestPricesDepth = 1;
 
         Parameters.Builder parameters = new Parameters.Builder(marketId);
         parameters.setPriceProjection(priceProjection);

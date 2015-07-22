@@ -6,23 +6,27 @@ import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
+import com.mauriciotogneri.kernel.api.base.Types.PriceSize;
 import com.mauriciotogneri.kernel.api.base.Types.Runner;
 import com.mauriciotogneri.kernel.api.betting.ListMarketBook;
 import com.mauriciotogneri.kernel.processors.EventProcessor;
 import com.mauriciotogneri.kernel.utils.LogWriter;
+import com.mauriciotogneri.kernel.utils.NumberFormatter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 
 import java.io.IOException;
+import java.util.List;
 
-public class MarketMonitor extends AbstractMonitor
+public class MarketMonitorSimple extends AbstractMonitor
 {
     private final Event event;
     private final EventProcessor eventProcessor;
     private final String marketId;
     private final String marketType;
+    private final String folderPath;
 
     private LogWriter logWriter;
     private PeriodFormatter periodFormatter;
@@ -31,9 +35,9 @@ public class MarketMonitor extends AbstractMonitor
     private long eventStartTime = 0;
 
     private static final String SEPARATOR = ";";
-    private static final int WAITING_TIME = 10 * 1000; // ten second (in milliseconds)
+    private static final int WAITING_TIME = 1000; // one second (in milliseconds)
 
-    public MarketMonitor(HttpClient httpClient, Session session, Event event, MarketCatalogue marketCatalogue, EventProcessor eventProcessor)
+    public MarketMonitorSimple(HttpClient httpClient, Session session, String folderPath, Event event, MarketCatalogue marketCatalogue, EventProcessor eventProcessor)
     {
         super(httpClient, session);
 
@@ -41,6 +45,7 @@ public class MarketMonitor extends AbstractMonitor
         this.eventProcessor = eventProcessor;
         this.marketId = marketCatalogue.marketId;
         this.marketType = marketCatalogue.description.marketType;
+        this.folderPath = folderPath;
     }
 
     @Override
@@ -54,7 +59,7 @@ public class MarketMonitor extends AbstractMonitor
     {
         eventStartTime = TimeFormatter.dateToMilliseconds(event.openDate, "UTC");
 
-        logWriter = new LogWriter("logs/markets/" + event.id + "/" + marketId + ".csv");
+        logWriter = new LogWriter(folderPath + "/" + marketId + "-" + marketType + ".csv");
 
         periodFormatter = TimeFormatter.getPeriodFormatter();
 
@@ -68,9 +73,10 @@ public class MarketMonitor extends AbstractMonitor
 
             for (Runner runner : marketBook.runners)
             {
-                builder.append(SEPARATOR).append(runner.selectionId).append("-min");
-                builder.append(SEPARATOR).append(runner.selectionId).append("-max");
-                builder.append(SEPARATOR).append(runner.selectionId).append("-avg");
+                builder.append(SEPARATOR).append(runner.selectionId).append("-bac-pri");
+                builder.append(SEPARATOR).append(runner.selectionId).append("-bac-siz");
+                builder.append(SEPARATOR).append(runner.selectionId).append("-lay-pri");
+                builder.append(SEPARATOR).append(runner.selectionId).append("-lay-siz");
             }
 
             logWriter.write(builder.toString());
@@ -106,13 +112,21 @@ public class MarketMonitor extends AbstractMonitor
         {
             if (runner.isActive())
             {
-                double minimumPrice = runner.ex.getMinimumPrice();
-                double maximumPrice = runner.ex.getMaximumPrice();
-                double averagePrice = runner.ex.getAveragePrice();
+                List<PriceSize> availableToBack = runner.ex.availableToBack;
 
-                builder.append(SEPARATOR).append(String.valueOf(minimumPrice));
-                builder.append(SEPARATOR).append(String.valueOf(maximumPrice));
-                builder.append(SEPARATOR).append(String.valueOf(averagePrice));
+                for (PriceSize priceSize : availableToBack)
+                {
+                    builder.append(SEPARATOR).append(NumberFormatter.round(priceSize.price, 3));
+                    builder.append(SEPARATOR).append(NumberFormatter.round(priceSize.size, 3));
+                }
+
+                List<PriceSize> availableToLay = runner.ex.availableToLay;
+
+                for (PriceSize priceSize : availableToLay)
+                {
+                    builder.append(SEPARATOR).append(NumberFormatter.round(priceSize.price, 3));
+                    builder.append(SEPARATOR).append(NumberFormatter.round(priceSize.size, 3));
+                }
             }
         }
 

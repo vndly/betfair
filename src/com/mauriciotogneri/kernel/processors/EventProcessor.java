@@ -7,7 +7,7 @@ import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
 import com.mauriciotogneri.kernel.monitors.EventMonitor;
-import com.mauriciotogneri.kernel.monitors.MarketMonitor;
+import com.mauriciotogneri.kernel.monitors.MarketMonitorSimple;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ public class EventProcessor
         this.event = event;
     }
 
-    public void process(HttpClient httpClient, Session session) throws IOException
+    public void process(HttpClient httpClient, Session session, String folderPath) throws IOException
     {
         ListMarketCatalogue.Response response = ListMarketCatalogue.get(httpClient, session, event.id, MarketTypeEnum.MATCH_ODDS.toString());
 
@@ -31,8 +31,8 @@ public class EventProcessor
         {
             incrementMarket();
 
-            MarketMonitor marketProcessor = new MarketMonitor(HttpClient.getDefault(), session, event, marketCatalogue, this);
-            marketProcessor.start();
+            MarketMonitorSimple marketMonitorSimple = new MarketMonitorSimple(HttpClient.getDefault(), session, folderPath, event, marketCatalogue, this);
+            marketMonitorSimple.start();
         }
     }
 

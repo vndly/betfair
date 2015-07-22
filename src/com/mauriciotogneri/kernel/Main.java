@@ -29,22 +29,23 @@ public class Main
         String password = properties.getProperty("password");
         String appKey = properties.getProperty("appkey");
 
-        HttpClient httpClient = HttpClient.getDefault();
-
-        run(httpClient, username, password, appKey);
+        run(username, password, appKey);
     }
 
-    private void run(HttpClient httpClient, String username, String password, String appKey) throws IOException
+    private void run(String username, String password, String appKey) throws IOException
     {
         //Login login = new Login(httpClient);
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "+YmMV73iPos3p5wwmKWXA64EiX86XX3r4KPrxSLZpHQ=");
+        Session session = new Session(appKey, "89qZEJ3xMRJjSw47V2rJFWAqDReg7Zaz3LKbuNhYBvY=");
 
         //KeepAlive keepAlive = new KeepAlive(httpClient);
         //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
 
-        EventMonitor eventMonitor = new EventMonitor(httpClient, session, EventTypeEnum.SOCCER.toString());
-        eventMonitor.start();
+        EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString());
+        eventMonitorSoccer.start();
+
+        EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString());
+        eventMonitorTennis.start();
     }
 }

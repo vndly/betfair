@@ -76,4 +76,9 @@ public class Enums
     {
         ACTIVE, WINNER, LOSER, REMOVED_VACANT, REMOVED, HIDDEN
     }
+
+    public enum RollupModel
+    {
+        STAKE, PAYOUT, MANAGED_LIABILITY, NONE;
+    }
 }
