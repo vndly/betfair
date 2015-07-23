@@ -47,20 +47,16 @@ public class EventMonitor extends AbstractMonitor
         return eventsSet.contains(eventId);
     }
 
-    public synchronized void addEvent(String eventId)
+    public synchronized boolean addEvent(String eventId)
     {
         if (!eventExists(eventId))
         {
             eventsSet.add(eventId);
-        }
-    }
 
-    public synchronized void removeEvent(String eventId)
-    {
-        if (eventExists(eventId))
-        {
-            eventsSet.remove(eventId);
+            return true;
         }
+
+        return false;
     }
 
     @Override
@@ -72,13 +68,11 @@ public class EventMonitor extends AbstractMonitor
         {
             Event event = eventResult.event;
 
-            if (!eventExists(event.id))
+            if (addEvent(event.id))
             {
-                addEvent(event.id);
-
                 String folderPath = "logs/events/" + eventType + "/" + event.id;
 
-                EventProcessor eventProcessor = new EventProcessor(this, event);
+                EventProcessor eventProcessor = new EventProcessor(event);
                 eventProcessor.process(HttpClient.getDefault(), session, folderPath);
 
                 logEvent(event, folderPath);

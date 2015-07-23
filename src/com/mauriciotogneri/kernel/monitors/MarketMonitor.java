@@ -8,7 +8,6 @@ import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.base.Types.Runner;
 import com.mauriciotogneri.kernel.api.betting.ListMarketBook;
-import com.mauriciotogneri.kernel.processors.EventProcessor;
 import com.mauriciotogneri.kernel.utils.LogWriter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
@@ -20,7 +19,6 @@ import java.io.IOException;
 public class MarketMonitor extends AbstractMonitor
 {
     private final Event event;
-    private final EventProcessor eventProcessor;
     private final String marketId;
     private final String marketType;
 
@@ -33,12 +31,11 @@ public class MarketMonitor extends AbstractMonitor
     private static final String SEPARATOR = ";";
     private static final int WAITING_TIME = 10 * 1000; // ten second (in milliseconds)
 
-    public MarketMonitor(HttpClient httpClient, Session session, Event event, MarketCatalogue marketCatalogue, EventProcessor eventProcessor)
+    public MarketMonitor(HttpClient httpClient, Session session, Event event, MarketCatalogue marketCatalogue)
     {
         super(httpClient, session);
 
         this.event = event;
-        this.eventProcessor = eventProcessor;
         this.marketId = marketCatalogue.marketId;
         this.marketType = marketCatalogue.description.marketType;
     }
@@ -77,12 +74,6 @@ public class MarketMonitor extends AbstractMonitor
         }
 
         return (marketBook != null);
-    }
-
-    @Override
-    protected void onPostExecute()
-    {
-        eventProcessor.decrementMarket();
     }
 
     @Override

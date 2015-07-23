@@ -34,10 +34,10 @@ public class Main
 
     private void run(String username, String password, String appKey) throws IOException
     {
-        //Login login = new Login(httpClient);
+        //Login login = new Login(HttpClient.getDefault());
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "89qZEJ3xMRJjSw47V2rJFWAqDReg7Zaz3LKbuNhYBvY=");
+        Session session = new Session(appKey, "RnUW9IoAyQ9q5AvHchdLNnYxFBpG5BHuTf8iWttRqFo=");
 
         //KeepAlive keepAlive = new KeepAlive(httpClient);
         //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
