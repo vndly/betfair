@@ -35,11 +35,15 @@ public class ListEvents extends BettingRequest<Response, ListCallParameters>
     {
     }
 
-    public static ListEvents getRequest(HttpClient httpClient, Session session, String... eventTypes) throws IOException
+    public static ListEvents getRequest(HttpClient httpClient, Session session, boolean inPlay, String... eventTypes) throws IOException
     {
         MarketFilter.Builder marketFilter = new Builder();
         marketFilter.setEventTypeIds(eventTypes);
-        marketFilter.setInPlayOnly(true);
+
+        if (inPlay)
+        {
+            marketFilter.setInPlayOnly(true);
+        }
 
         ListCallParameters parameters = new ListCallParameters(marketFilter.build());
 

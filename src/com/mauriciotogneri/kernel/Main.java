@@ -37,15 +37,15 @@ public class Main
         //Login login = new Login(HttpClient.getDefault());
         //LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "RnUW9IoAyQ9q5AvHchdLNnYxFBpG5BHuTf8iWttRqFo=");
+        Session session = new Session(appKey, "EjKOscUsU/vHeOzEj8EIQrNJx8iIwqpJdLqSRJhiJc8=");
 
         //KeepAlive keepAlive = new KeepAlive(httpClient);
         //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
 
-        EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString());
-        eventMonitorSoccer.start();
+        //EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString(), true);
+        //eventMonitorSoccer.start();
 
-        EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString());
+        EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString(), true);
         eventMonitorTennis.start();
     }
 }

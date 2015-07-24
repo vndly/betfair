@@ -66,6 +66,26 @@ public class Types
         {
             return (status != null) && (status == RunnerStatus.ACTIVE);
         }
+
+        public PriceSize getBackValue()
+        {
+            if ((ex != null) && (!ex.availableToBack.isEmpty()))
+            {
+                return ex.availableToBack.get(0);
+            }
+
+            return null;
+        }
+
+        public PriceSize getLayValue()
+        {
+            if ((ex != null) && (!ex.availableToLay.isEmpty()))
+            {
+                return ex.availableToLay.get(0);
+            }
+
+            return null;
+        }
     }
 
     public static class PriceSize
@@ -209,6 +229,19 @@ public class Types
         public boolean runnersVoidable = false;
         public long version = 0;
         public List<Runner> runners = new ArrayList<>();
+
+        public Runner getRunner(long selectionId)
+        {
+            for (Runner runner : runners)
+            {
+                if (runner.selectionId == selectionId)
+                {
+                    return runner;
+                }
+            }
+
+            return null;
+        }
     }
 
     public static class MarketDescription

@@ -16,16 +16,18 @@ import java.util.Set;
 public class EventMonitor extends AbstractMonitor
 {
     private final String eventType;
+    private final boolean inPlay;
     private ListEvents listEvents;
     private final Set<String> eventsSet = new HashSet<>();
 
     private static final int WAITING_TIME = 60 * 1000; // one minute (in milliseconds)
 
-    public EventMonitor(HttpClient httpClient, Session session, String eventType)
+    public EventMonitor(HttpClient httpClient, Session session, String eventType, boolean inPlay)
     {
         super(httpClient, session);
 
         this.eventType = eventType;
+        this.inPlay = inPlay;
     }
 
     @Override
@@ -37,7 +39,7 @@ public class EventMonitor extends AbstractMonitor
     @Override
     protected boolean onPreExecute() throws Exception
     {
-        listEvents = ListEvents.getRequest(httpClient, session, eventType);
+        listEvents = ListEvents.getRequest(httpClient, session, inPlay, eventType);
 
         return true;
     }

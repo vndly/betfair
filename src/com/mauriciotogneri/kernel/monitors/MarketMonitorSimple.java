@@ -15,6 +15,7 @@ import com.mauriciotogneri.kernel.utils.NumberFormatter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MarketMonitorSimple extends AbstractMonitor
@@ -30,7 +31,8 @@ public class MarketMonitorSimple extends AbstractMonitor
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
 
-    private static final String SEPARATOR = ",";
+    private List<Long> selections = new ArrayList<>();
+
     private static final int WAITING_TIME = 1000; // one second (in milliseconds)
 
     public MarketMonitorSimple(HttpClient httpClient, Session session, String folderPath, Event event, MarketCatalogue marketCatalogue)
@@ -68,10 +70,13 @@ public class MarketMonitorSimple extends AbstractMonitor
 
             for (Runner runner : marketBook.runners)
             {
-                csvLine.append(runner.selectionId + "-bac-pri");
-                csvLine.append(runner.selectionId + "-bac-siz");
-                csvLine.append(runner.selectionId + "-lay-pri");
-                csvLine.append(runner.selectionId + "-lay-siz");
+                selections.add(runner.selectionId);
+
+                csvLine.append(runner.selectionId + "-back");
+                //csvLine.append(runner.selectionId + "-bac-siz");
+                csvLine.append(runner.selectionId + "-lay");
+                //csvLine.append(runner.selectionId + "-lay-siz");
+                csvLine.append(runner.selectionId + "-diff");
             }
 
             logPrice.write(csvLine);
@@ -106,32 +111,48 @@ public class MarketMonitorSimple extends AbstractMonitor
             CsvLine csvLine = new CsvLine();
             csvLine.appendTimestamp(timestamp);
 
-            for (Runner runner : marketBook.runners)
+            for (Long selectionId : selections)
             {
-                if (runner.isActive())
+                PriceSize priceBack = null;
+                PriceSize priceLay = null;
+
+                Runner runner = marketBook.getRunner(selectionId);
+
+                if ((runner != null) && (runner.isActive()))
                 {
-                    List<PriceSize> availableToBack = runner.ex.availableToBack;
+                    priceBack = runner.getBackValue();
+                    priceLay = runner.getLayValue();
+                }
 
-                    for (PriceSize priceSize : availableToBack)
-                    {
-                        csvLine.append(NumberFormatter.round(priceSize.price, 3));
-                        csvLine.append(NumberFormatter.round(priceSize.size, 3));
-                    }
+                if (priceBack != null)
+                {
+                    csvLine.append(NumberFormatter.round(priceBack.price, 3));
+                }
+                else
+                {
+                    csvLine.append(0);
+                }
 
-                    List<PriceSize> availableToLay = runner.ex.availableToLay;
+                if (priceLay != null)
+                {
+                    csvLine.append(NumberFormatter.round(priceLay.price, 3));
+                }
+                else
+                {
+                    csvLine.append(0);
+                }
 
-                    for (PriceSize priceSize : availableToLay)
-                    {
-                        csvLine.append(NumberFormatter.round(priceSize.price, 3));
-                        csvLine.append(NumberFormatter.round(priceSize.size, 3));
-                    }
+                if ((priceBack != null) && (priceLay != null))
+                {
+                    csvLine.append(NumberFormatter.round(priceLay.price - priceBack.price, 3));
+                }
+                else
+                {
+                    csvLine.append(0);
                 }
             }
 
-            if (!marketBook.runners.isEmpty())
-            {
-                logPrice.write(csvLine);
-            }
+            logPrice.write(csvLine);
         }
 
         return true;
