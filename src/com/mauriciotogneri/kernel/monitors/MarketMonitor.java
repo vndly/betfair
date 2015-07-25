@@ -6,38 +6,47 @@ import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
+import com.mauriciotogneri.kernel.api.base.Types.PriceSize;
 import com.mauriciotogneri.kernel.api.base.Types.Runner;
 import com.mauriciotogneri.kernel.api.betting.ListMarketBook;
-import com.mauriciotogneri.kernel.logs.LogWriter;
+import com.mauriciotogneri.kernel.csv.CsvFile;
+import com.mauriciotogneri.kernel.csv.CsvLine;
+import com.mauriciotogneri.kernel.models.Selection;
+import com.mauriciotogneri.kernel.models.Tick;
+import com.mauriciotogneri.kernel.strategies.Strategy1;
+import com.mauriciotogneri.kernel.utils.NumberFormatter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MarketMonitor extends AbstractMonitor
 {
     private final Event event;
     private final String marketId;
     private final String marketType;
+    private final String folderPath;
 
-    private LogWriter logWriter;
-    private PeriodFormatter periodFormatter;
+    private CsvFile logStatus;
+
+    private Strategy1 strategy1;
 
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
 
-    private static final String SEPARATOR = ";";
-    private static final int WAITING_TIME = 10 * 1000; // ten second (in milliseconds)
+    private List<Long> selections = new ArrayList<>();
 
-    public MarketMonitor(HttpClient httpClient, Session session, Event event, MarketCatalogue marketCatalogue)
+    private static final int WAITING_TIME = 1000; // one second (in milliseconds)
+
+    public MarketMonitor(HttpClient httpClient, Session session, String folderPath, Event event, MarketCatalogue marketCatalogue)
     {
         super(httpClient, session);
 
         this.event = event;
         this.marketId = marketCatalogue.marketId;
         this.marketType = marketCatalogue.description.marketType;
+        this.folderPath = folderPath;
     }
 
     @Override
@@ -51,9 +60,7 @@ public class MarketMonitor extends AbstractMonitor
     {
         eventStartTime = TimeFormatter.dateToMilliseconds(event.openDate, "UTC");
 
-        logWriter = new LogWriter("logs/markets/" + event.id + "/" + marketId + ".csv");
-
-        periodFormatter = TimeFormatter.getPeriodFormatter();
+        logStatus = new CsvFile(folderPath + "/status.csv");
 
         listMarketBook = ListMarketBook.getRequest(httpClient, session, marketId);
 
@@ -61,17 +68,13 @@ public class MarketMonitor extends AbstractMonitor
 
         if (marketBook != null)
         {
-            StringBuilder builder = new StringBuilder();
-
             for (Runner runner : marketBook.runners)
             {
-                builder.append(SEPARATOR).append(runner.selectionId).append("-min");
-                builder.append(SEPARATOR).append(runner.selectionId).append("-max");
-                builder.append(SEPARATOR).append(runner.selectionId).append("-avg");
+                selections.add(runner.selectionId);
             }
-
-            logWriter.write(builder.toString());
         }
+
+        strategy1 = new Strategy1(selections, folderPath, marketId, marketType);
 
         return (marketBook != null);
     }
@@ -81,35 +84,55 @@ public class MarketMonitor extends AbstractMonitor
     {
         MarketBook marketBook = getMarketBook();
 
+        long timestamp = (System.currentTimeMillis() - eventStartTime);
+
+        if (marketBook != null)
+        {
+            CsvLine csvLine = new CsvLine();
+            csvLine.appendTimestamp(timestamp);
+            csvLine.append(marketBook.status.toString());
+
+            logStatus.write(csvLine);
+        }
+
         if ((marketBook == null) || (marketBook.status == MarketStatus.CLOSED))
         {
             return false;
         }
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n");
-
-        long currentTime = (System.currentTimeMillis() - eventStartTime);
-        Period period = new Period(currentTime);
-        builder.append(periodFormatter.print(period));
-
-        for (Runner runner : marketBook.runners)
+        if (marketBook.status == MarketStatus.OPEN)
         {
-            if (runner.isActive())
+            Tick tick = new Tick(timestamp);
+
+            for (Long selectionId : selections)
             {
-                double minimumPrice = runner.ex.getMinimumPrice();
-                double maximumPrice = runner.ex.getMaximumPrice();
-                double averagePrice = runner.ex.getAveragePrice();
+                double back = 0;
+                double lay = 0;
 
-                builder.append(SEPARATOR).append(String.valueOf(minimumPrice));
-                builder.append(SEPARATOR).append(String.valueOf(maximumPrice));
-                builder.append(SEPARATOR).append(String.valueOf(averagePrice));
+                Runner runner = marketBook.getRunner(selectionId);
+
+                if ((runner != null) && (runner.isActive()))
+                {
+                    PriceSize priceBack = runner.getBackValue();
+
+                    if (priceBack != null)
+                    {
+                        back = NumberFormatter.round(priceBack.price);
+                    }
+
+                    PriceSize priceLay = runner.getLayValue();
+
+                    if (priceLay != null)
+                    {
+                        lay = NumberFormatter.round(priceLay.price);
+                    }
+                }
+
+                Selection selection = new Selection(selectionId, back, lay);
+                tick.add(selection);
             }
-        }
 
-        if (!marketBook.runners.isEmpty())
-        {
-            logWriter.write(builder.toString());
+            strategy1.process(tick);
         }
 
         return true;

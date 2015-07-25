@@ -6,7 +6,7 @@ import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
-import com.mauriciotogneri.kernel.monitors.MarketMonitorSimple;
+import com.mauriciotogneri.kernel.monitors.MarketMonitor;
 
 import java.io.IOException;
 
@@ -25,8 +25,8 @@ public class EventProcessor
 
         for (MarketCatalogue marketCatalogue : response)
         {
-            MarketMonitorSimple marketMonitorSimple = new MarketMonitorSimple(HttpClient.getDefault(), session, folderPath, event, marketCatalogue);
-            marketMonitorSimple.start();
+            MarketMonitor marketMonitor = new MarketMonitor(HttpClient.getDefault(), session, folderPath, event, marketCatalogue);
+            marketMonitor.start();
         }
     }
 }
