@@ -40,6 +40,10 @@ public class TimeFormatter
         periodFormatterBuilder.printZeroAlways();
         periodFormatterBuilder.minimumPrintedDigits(2);
         periodFormatterBuilder.appendSeconds();
+        periodFormatterBuilder.appendSeparator(".");
+        periodFormatterBuilder.printZeroAlways();
+        periodFormatterBuilder.minimumPrintedDigits(3);
+        periodFormatterBuilder.appendMillis();
 
         return periodFormatterBuilder.toFormatter();
     }

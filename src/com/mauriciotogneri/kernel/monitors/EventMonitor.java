@@ -4,9 +4,10 @@ import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.EventResult;
+import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.betting.ListEvents;
+import com.mauriciotogneri.kernel.api.betting.ListMarketCatalogue;
 import com.mauriciotogneri.kernel.logs.ErrorLog;
-import com.mauriciotogneri.kernel.processors.EventProcessor;
 import com.mauriciotogneri.kernel.utils.IoUtils;
 import com.mauriciotogneri.kernel.utils.JsonUtils;
 
@@ -19,16 +20,18 @@ public class EventMonitor extends AbstractMonitor
     private final String eventType;
     private final boolean inPlay;
     private ListEvents listEvents;
+    private final String[] marketTypes;
     private final Set<String> eventsSet = new HashSet<>();
 
     private static final int WAITING_TIME = 60 * 1000; // one minute (in milliseconds)
 
-    public EventMonitor(HttpClient httpClient, Session session, String eventType, boolean inPlay)
+    public EventMonitor(HttpClient httpClient, Session session, String eventType, boolean inPlay, String[] marketTypes)
     {
         super(httpClient, session);
 
         this.eventType = eventType;
         this.inPlay = inPlay;
+        this.marketTypes = marketTypes;
     }
 
     @Override
@@ -75,8 +78,13 @@ public class EventMonitor extends AbstractMonitor
             {
                 String folderPath = "logs/events/" + eventType + "/" + event.id;
 
-                EventProcessor eventProcessor = new EventProcessor(event);
-                eventProcessor.process(HttpClient.getDefault(), session, folderPath);
+                ListMarketCatalogue.Response marketCatalogueResponse = ListMarketCatalogue.get(HttpClient.getDefault(), session, event.id, marketTypes);
+
+                for (MarketCatalogue marketCatalogue : marketCatalogueResponse)
+                {
+                    MarketMonitor marketMonitor = new MarketMonitor(HttpClient.getDefault(), session, folderPath, event, marketCatalogue);
+                    marketMonitor.start();
+                }
 
                 logEvent(event, folderPath);
             }

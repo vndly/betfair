@@ -37,7 +37,7 @@ public abstract class BettingRequest<T, P>
         builder.url("https://api.betfair.com/exchange/betting/rest/v1.0/" + getMethod() + "/");
 
         builder.addHeader("X-Application", session.appKey);
-        builder.addHeader("X-Authentication", session.sessionToken);
+        builder.addHeader("X-Authentication", session.getSessionToken());
         builder.addHeader("Content-Type", "application/json");
         builder.addHeader("Accept", "application/json");
 

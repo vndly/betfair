@@ -5,7 +5,7 @@ public class Enums
 {
     public enum EventTypeEnum
     {
-        SOCCER("1"), TENNIS("2"), GOLF("3"); // TODO
+        SOCCER("1"), TENNIS("2"), HORSE_RACING("7"); // TODO
 
         private final String id;
 
@@ -22,7 +22,9 @@ public class Enums
 
     public enum MarketTypeEnum
     {
-        MATCH_ODDS("MATCH_ODDS"), OVER_UNDER_25("OVER_UNDER_25"), NEXT_GOAL("NEXT_GOAL"); // TODO
+        MATCH_ODDS("MATCH_ODDS"), //
+        OVER_UNDER_05("OVER_UNDER_05"), //
+        OVER_UNDER_15("OVER_UNDER_15"); // TODO
 
         private final String code;
 
@@ -79,6 +81,11 @@ public class Enums
 
     public enum RollupModel
     {
-        STAKE, PAYOUT, MANAGED_LIABILITY, NONE;
+        STAKE, PAYOUT, MANAGED_LIABILITY, NONE
+    }
+
+    public enum Side
+    {
+        BACK, LAY
     }
 }

@@ -17,4 +17,45 @@ public class Tick
     {
         selections.add(selection);
     }
+
+    public Selection getLowestBack()
+    {
+        Selection result = null;
+
+        for (Selection selection : selections)
+        {
+            if ((result == null) || (selection.back < result.back))
+            {
+                result = selection;
+            }
+        }
+
+        return result;
+    }
+
+    public boolean allBackAvailable()
+    {
+        for (Selection selection : selections)
+        {
+            if (selection.back == 0)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public double getLayPrice(long selectionId)
+    {
+        for (Selection selection : selections)
+        {
+            if (selection.id == selectionId)
+            {
+                return selection.lay;
+            }
+        }
+
+        return 0;
+    }
 }

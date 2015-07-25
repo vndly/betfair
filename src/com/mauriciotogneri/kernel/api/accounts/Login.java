@@ -34,7 +34,7 @@ public class Login
 
         Response response = httpClient.client.newCall(builder.build()).execute();
 
-        return JsonUtils.fromJson(response.body().charStream(), LoginResponse.class);
+        return JsonUtils.fromJson(response.body().string(), LoginResponse.class);
     }
 
     public static class LoginResponse

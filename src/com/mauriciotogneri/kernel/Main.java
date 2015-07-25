@@ -1,11 +1,15 @@
 package com.mauriciotogneri.kernel;
 
+import com.mauriciotogneri.kernel.api.accounts.Login;
+import com.mauriciotogneri.kernel.api.accounts.Login.LoginResponse;
 import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
+import com.mauriciotogneri.kernel.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.dependency.AppObjectProvider;
 import com.mauriciotogneri.kernel.dependency.CustomObjectProvider;
 import com.mauriciotogneri.kernel.monitors.EventMonitor;
+import com.mauriciotogneri.kernel.monitors.SessionMonitor;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,18 +43,24 @@ public class Main
 
     private void run(String username, String password, String appKey) throws IOException
     {
-        //Login login = new Login(HttpClient.getDefault());
-        //LoginResponse loginResponse = login.execute(username, password, appKey);
+        Login login = new Login(HttpClient.getDefault());
+        LoginResponse loginResponse = login.execute(username, password, appKey);
 
-        Session session = new Session(appKey, "OmQTECUNZ+8UYyPrB46L+AOABr5xZGWudDbQ8CeJ8gA=");
+        Session session = new Session(appKey, loginResponse.token);
 
-        //KeepAlive keepAlive = new KeepAlive(httpClient);
-        //LoginResponse keepAliveResponse = keepAlive.execute(appKey, session.sessionToken);
+        String[] soccerMarkets = new String[1];
+        soccerMarkets[0] = MarketTypeEnum.OVER_UNDER_15.toString();
 
-        //EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString(), true);
-        //eventMonitorSoccer.start();
+        EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString(), true, soccerMarkets);
+        eventMonitorSoccer.start();
 
-        EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString(), true);
-        eventMonitorTennis.start();
+        //EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString(), true);
+        //eventMonitorTennis.start();
+
+        //EventMonitor eventMonitorHorse = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.HORSE_RACING.toString(), false);
+        //eventMonitorHorse.start();
+
+        SessionMonitor sessionMonitor = new SessionMonitor(HttpClient.getDefault(), session, username, password);
+        sessionMonitor.start();
     }
 }

@@ -13,7 +13,7 @@ import com.mauriciotogneri.kernel.csv.CsvFile;
 import com.mauriciotogneri.kernel.csv.CsvLine;
 import com.mauriciotogneri.kernel.models.Selection;
 import com.mauriciotogneri.kernel.models.Tick;
-import com.mauriciotogneri.kernel.strategies.Strategy1;
+import com.mauriciotogneri.kernel.strategies.StrategySoccerOverUnder15;
 import com.mauriciotogneri.kernel.utils.NumberFormatter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
@@ -30,14 +30,14 @@ public class MarketMonitor extends AbstractMonitor
 
     private CsvFile logStatus;
 
-    private Strategy1 strategy1;
+    private StrategySoccerOverUnder15 strategy;
 
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
 
     private List<Long> selections = new ArrayList<>();
 
-    private static final int WAITING_TIME = 1000; // one second (in milliseconds)
+    private static final int WAITING_TIME = 250; // 4 times per second (in milliseconds)
 
     public MarketMonitor(HttpClient httpClient, Session session, String folderPath, Event event, MarketCatalogue marketCatalogue)
     {
@@ -60,7 +60,7 @@ public class MarketMonitor extends AbstractMonitor
     {
         eventStartTime = TimeFormatter.dateToMilliseconds(event.openDate, "UTC");
 
-        logStatus = new CsvFile(folderPath + "/status.csv");
+        logStatus = new CsvFile(folderPath + "/status-" + marketType + ".csv");
 
         listMarketBook = ListMarketBook.getRequest(httpClient, session, marketId);
 
@@ -74,7 +74,7 @@ public class MarketMonitor extends AbstractMonitor
             }
         }
 
-        strategy1 = new Strategy1(selections, folderPath, marketId, marketType);
+        strategy = new StrategySoccerOverUnder15(selections, folderPath, marketId, marketType);
 
         return (marketBook != null);
     }
@@ -132,7 +132,7 @@ public class MarketMonitor extends AbstractMonitor
                 tick.add(selection);
             }
 
-            strategy1.process(tick);
+            strategy.process(tick);
         }
 
         return true;

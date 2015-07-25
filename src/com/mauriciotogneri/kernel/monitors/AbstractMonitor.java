@@ -20,10 +20,6 @@ public abstract class AbstractMonitor extends Thread
         return 0;
     }
 
-    protected void onException(Exception e)
-    {
-    }
-
     protected boolean onPreExecute() throws Exception
     {
         return true;
@@ -45,13 +41,29 @@ public abstract class AbstractMonitor extends Thread
                 int waitingTime = getWaitTime();
                 boolean continueExecuting = true;
 
+                long startTime;
+                long processTime;
+
                 while (continueExecuting)
                 {
-                    continueExecuting = execute();
+                    startTime = System.currentTimeMillis();
 
-                    if (continueExecuting && (waitingTime > 0))
+                    try
                     {
-                        threadSleep(waitingTime);
+                        continueExecuting = execute();
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorLog.log(e);
+                    }
+                    finally
+                    {
+                        processTime = System.currentTimeMillis() - startTime;
+                    }
+
+                    if (continueExecuting)
+                    {
+                        threadSleep(waitingTime - processTime);
                     }
                 }
             }
@@ -59,8 +71,6 @@ public abstract class AbstractMonitor extends Thread
         catch (Exception e)
         {
             ErrorLog.log(e);
-
-            onException(e);
         }
         finally
         {
