@@ -15,9 +15,18 @@ public class CsvLine
 
     public CsvLine appendTimestamp(long timestamp)
     {
-        Period period = new Period(timestamp);
+        if (timestamp > 0)
+        {
+            Period period = new Period(timestamp);
 
-        return append(periodFormatter.print(period));
+            return append(periodFormatter.print(period));
+        }
+        else
+        {
+            Period period = new Period(Math.abs(timestamp));
+
+            return append("-" + periodFormatter.print(period));
+        }
     }
 
     public CsvLine append(String value)

@@ -11,6 +11,9 @@ import com.mauriciotogneri.kernel.api.base.Types.Runner;
 import com.mauriciotogneri.kernel.api.betting.ListMarketBook;
 import com.mauriciotogneri.kernel.csv.CsvFile;
 import com.mauriciotogneri.kernel.csv.CsvLine;
+import com.mauriciotogneri.kernel.models.Selection;
+import com.mauriciotogneri.kernel.models.Tick;
+import com.mauriciotogneri.kernel.strategies.Strategy1;
 import com.mauriciotogneri.kernel.utils.NumberFormatter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
@@ -25,8 +28,9 @@ public class MarketMonitorSimple extends AbstractMonitor
     private final String marketType;
     private final String folderPath;
 
-    private CsvFile logPrice;
     private CsvFile logStatus;
+
+    private Strategy1 strategy1;
 
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
@@ -56,7 +60,6 @@ public class MarketMonitorSimple extends AbstractMonitor
     {
         eventStartTime = TimeFormatter.dateToMilliseconds(event.openDate, "UTC");
 
-        logPrice = new CsvFile(folderPath + "/" + marketId + "-" + marketType + ".csv");
         logStatus = new CsvFile(folderPath + "/status.csv");
 
         listMarketBook = ListMarketBook.getRequest(httpClient, session, marketId);
@@ -65,22 +68,13 @@ public class MarketMonitorSimple extends AbstractMonitor
 
         if (marketBook != null)
         {
-            CsvLine csvLine = new CsvLine();
-            csvLine.separator();
-
             for (Runner runner : marketBook.runners)
             {
                 selections.add(runner.selectionId);
-
-                csvLine.append(runner.selectionId + "-back");
-                //csvLine.append(runner.selectionId + "-bac-siz");
-                csvLine.append(runner.selectionId + "-lay");
-                //csvLine.append(runner.selectionId + "-lay-siz");
-                csvLine.append(runner.selectionId + "-diff");
             }
-
-            logPrice.write(csvLine);
         }
+
+        strategy1 = new Strategy1(selections, folderPath, marketId, marketType);
 
         return (marketBook != null);
     }
@@ -108,51 +102,37 @@ public class MarketMonitorSimple extends AbstractMonitor
 
         if (marketBook.status == MarketStatus.OPEN)
         {
-            CsvLine csvLine = new CsvLine();
-            csvLine.appendTimestamp(timestamp);
+            Tick tick = new Tick(timestamp);
 
             for (Long selectionId : selections)
             {
-                PriceSize priceBack = null;
-                PriceSize priceLay = null;
+                double back = 0;
+                double lay = 0;
 
                 Runner runner = marketBook.getRunner(selectionId);
 
                 if ((runner != null) && (runner.isActive()))
                 {
-                    priceBack = runner.getBackValue();
-                    priceLay = runner.getLayValue();
+                    PriceSize priceBack = runner.getBackValue();
+
+                    if (priceBack != null)
+                    {
+                        back = NumberFormatter.round(priceBack.price);
+                    }
+
+                    PriceSize priceLay = runner.getLayValue();
+
+                    if (priceLay != null)
+                    {
+                        lay = NumberFormatter.round(priceLay.price);
+                    }
                 }
 
-                if (priceBack != null)
-                {
-                    csvLine.append(NumberFormatter.round(priceBack.price, 3));
-                }
-                else
-                {
-                    csvLine.append(0);
-                }
-
-                if (priceLay != null)
-                {
-                    csvLine.append(NumberFormatter.round(priceLay.price, 3));
-                }
-                else
-                {
-                    csvLine.append(0);
-                }
-
-                if ((priceBack != null) && (priceLay != null))
-                {
-                    csvLine.append(NumberFormatter.round(priceLay.price - priceBack.price, 3));
-                }
-                else
-                {
-                    csvLine.append(0);
-                }
+                Selection selection = new Selection(selectionId, back, lay);
+                tick.add(selection);
             }
 
-            logPrice.write(csvLine);
+            strategy1.process(tick);
         }
 
         return true;

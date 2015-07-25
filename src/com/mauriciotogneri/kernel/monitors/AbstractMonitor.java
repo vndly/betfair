@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel.monitors;
 
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
+import com.mauriciotogneri.kernel.logs.ErrorLog;
 
 public abstract class AbstractMonitor extends Thread
 {
@@ -57,7 +58,7 @@ public abstract class AbstractMonitor extends Thread
         }
         catch (Exception e)
         {
-            // TODO
+            ErrorLog.log(e);
 
             onException(e);
         }
@@ -77,7 +78,7 @@ public abstract class AbstractMonitor extends Thread
             }
             catch (InterruptedException e)
             {
-                e.printStackTrace();
+                // ignore
             }
         }
     }

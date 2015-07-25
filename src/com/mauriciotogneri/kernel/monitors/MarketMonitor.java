@@ -8,7 +8,7 @@ import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.kernel.api.base.Types.Runner;
 import com.mauriciotogneri.kernel.api.betting.ListMarketBook;
-import com.mauriciotogneri.kernel.utils.LogWriter;
+import com.mauriciotogneri.kernel.logs.LogWriter;
 import com.mauriciotogneri.kernel.utils.TimeFormatter;
 
 import org.joda.time.Period;

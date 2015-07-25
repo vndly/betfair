@@ -1,4 +1,6 @@
-package com.mauriciotogneri.kernel.utils;
+package com.mauriciotogneri.kernel.logs;
+
+import com.mauriciotogneri.kernel.utils.IoUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -6,10 +6,18 @@ import org.joda.time.format.PeriodFormatterBuilder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TimeZone;
 
 public class TimeFormatter
 {
+    private static final DateFormat timestampFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+
+    public static String getTimestamp()
+    {
+        return timestampFormat.format(new Date());
+    }
+
     public static long dateToMilliseconds(String timestamp, String timeZone) throws ParseException
     {
         DateFormat fullTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

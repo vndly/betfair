@@ -123,7 +123,7 @@ public class Types
                 }
             }
 
-            return NumberFormatter.round(result, 3);
+            return NumberFormatter.round(result);
         }
 
         public double getMaximumPrice()
@@ -140,7 +140,7 @@ public class Types
                 }
             }
 
-            return NumberFormatter.round(result, 3);
+            return NumberFormatter.round(result);
         }
 
         public double getAveragePrice()
@@ -153,7 +153,7 @@ public class Types
                 sum += priceSize.price;
             }
 
-            return NumberFormatter.round((length == 0) ? 0 : (sum / length), 3);
+            return NumberFormatter.round((length == 0) ? 0 : (sum / length));
         }
     }
 
@@ -170,8 +170,8 @@ public class Types
     {
         public List<PriceData> priceData;
         public ExBestOffersOverrides exBestOffersOverrides;
-        public boolean virtualise;
-        public boolean rolloverStakes;
+        public Boolean virtualise;
+        public Boolean rolloverStakes;
 
         public PriceProjection()
         {

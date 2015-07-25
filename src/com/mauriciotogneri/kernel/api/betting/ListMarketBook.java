@@ -95,6 +95,7 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
     public static ListMarketBook getRequest(HttpClient httpClient, Session session, String marketId) throws IOException
     {
         PriceProjection priceProjection = new PriceProjection(PriceData.EX_BEST_OFFERS);
+        priceProjection.virtualise = true;
         priceProjection.exBestOffersOverrides = new ExBestOffersOverrides();
         priceProjection.exBestOffersOverrides.bestPricesDepth = 1;
 

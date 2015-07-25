@@ -5,6 +5,7 @@ import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
 import com.mauriciotogneri.kernel.api.base.Types.EventResult;
 import com.mauriciotogneri.kernel.api.betting.ListEvents;
+import com.mauriciotogneri.kernel.logs.ErrorLog;
 import com.mauriciotogneri.kernel.processors.EventProcessor;
 import com.mauriciotogneri.kernel.utils.IoUtils;
 import com.mauriciotogneri.kernel.utils.JsonUtils;
@@ -92,7 +93,7 @@ public class EventMonitor extends AbstractMonitor
         }
         catch (IOException e)
         {
-            // TODO
+            ErrorLog.log(e);
         }
     }
 }

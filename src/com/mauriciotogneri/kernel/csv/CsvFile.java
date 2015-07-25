@@ -1,6 +1,6 @@
 package com.mauriciotogneri.kernel.csv;
 
-import com.mauriciotogneri.kernel.utils.LogWriter;
+import com.mauriciotogneri.kernel.logs.LogWriter;
 
 import java.io.IOException;
 
