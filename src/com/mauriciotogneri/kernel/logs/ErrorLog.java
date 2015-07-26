@@ -1,7 +1,7 @@
 package com.mauriciotogneri.kernel.logs;
 
 import com.mauriciotogneri.kernel.dependency.AppObjectProvider;
-import com.mauriciotogneri.kernel.utils.TimeFormatter;
+import com.mauriciotogneri.kernel.utils.TimeUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -12,7 +12,7 @@ public class ErrorLog
     {
         try
         {
-            AppObjectProvider.getErrorLog().write(TimeFormatter.getTimestamp() + "\t" + message + "\n");
+            AppObjectProvider.getErrorLog().write(TimeUtils.getTimestamp() + "\t" + message + "\n");
         }
         catch (Exception e)
         {

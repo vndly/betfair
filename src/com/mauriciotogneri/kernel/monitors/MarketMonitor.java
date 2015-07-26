@@ -1,5 +1,6 @@
 package com.mauriciotogneri.kernel.monitors;
 
+import com.mauriciotogneri.kernel.Constants;
 import com.mauriciotogneri.kernel.api.base.Enums.MarketStatus;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
@@ -13,9 +14,11 @@ import com.mauriciotogneri.kernel.csv.CsvFile;
 import com.mauriciotogneri.kernel.csv.CsvLine;
 import com.mauriciotogneri.kernel.models.Selection;
 import com.mauriciotogneri.kernel.models.Tick;
-import com.mauriciotogneri.kernel.strategies.StrategySoccerOverUnder15;
-import com.mauriciotogneri.kernel.utils.NumberFormatter;
-import com.mauriciotogneri.kernel.utils.TimeFormatter;
+import com.mauriciotogneri.kernel.strategies.Strategy;
+import com.mauriciotogneri.kernel.utils.IoUtils;
+import com.mauriciotogneri.kernel.utils.JsonUtils;
+import com.mauriciotogneri.kernel.utils.NumberUtils;
+import com.mauriciotogneri.kernel.utils.TimeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,13 +27,15 @@ import java.util.List;
 public class MarketMonitor extends AbstractMonitor
 {
     private final Event event;
+    private final String eventType;
     private final String marketId;
     private final String marketType;
-    private final String folderPath;
+    private final MarketCatalogue marketCatalogue;
+    private final String logFolderPath;
 
     private CsvFile logStatus;
 
-    private StrategySoccerOverUnder15 strategy;
+    private Strategy strategy;
 
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
@@ -39,14 +44,16 @@ public class MarketMonitor extends AbstractMonitor
 
     private static final int WAITING_TIME = 250; // 4 times per second (in milliseconds)
 
-    public MarketMonitor(HttpClient httpClient, Session session, String folderPath, Event event, MarketCatalogue marketCatalogue)
+    public MarketMonitor(HttpClient httpClient, Session session, String logFolderPath, Event event, String eventType, MarketCatalogue marketCatalogue)
     {
         super(httpClient, session);
 
         this.event = event;
+        this.eventType = eventType;
         this.marketId = marketCatalogue.marketId;
         this.marketType = marketCatalogue.description.marketType;
-        this.folderPath = folderPath;
+        this.marketCatalogue = marketCatalogue;
+        this.logFolderPath = logFolderPath;
     }
 
     @Override
@@ -58,9 +65,11 @@ public class MarketMonitor extends AbstractMonitor
     @Override
     protected boolean onPreExecute() throws Exception
     {
-        eventStartTime = TimeFormatter.dateToMilliseconds(event.openDate, "UTC");
+        IoUtils.writeFile(logFolderPath + Constants.Log.INFO_LOG_FILE, JsonUtils.toJson(marketCatalogue));
 
-        logStatus = new CsvFile(folderPath + "/status-" + marketType + ".csv");
+        eventStartTime = TimeUtils.dateToMilliseconds(event.openDate, "UTC");
+
+        logStatus = new CsvFile(logFolderPath + Constants.Log.STATUS_LOG_FILE);
 
         listMarketBook = ListMarketBook.getRequest(httpClient, session, marketId);
 
@@ -74,9 +83,9 @@ public class MarketMonitor extends AbstractMonitor
             }
         }
 
-        strategy = new StrategySoccerOverUnder15(selections, folderPath, marketId, marketType);
+        strategy = Strategy.getStrategy(eventType, marketType, marketId, selections, logFolderPath);
 
-        return (marketBook != null);
+        return (marketBook != null) && (strategy != null) && (strategy.isValid(System.currentTimeMillis() - eventStartTime));
     }
 
     @Override
@@ -117,14 +126,14 @@ public class MarketMonitor extends AbstractMonitor
 
                     if (priceBack != null)
                     {
-                        back = NumberFormatter.round(priceBack.price);
+                        back = NumberUtils.round(priceBack.price);
                     }
 
                     PriceSize priceLay = runner.getLayValue();
 
                     if (priceLay != null)
                     {
-                        lay = NumberFormatter.round(priceLay.price);
+                        lay = NumberUtils.round(priceLay.price);
                     }
                 }
 

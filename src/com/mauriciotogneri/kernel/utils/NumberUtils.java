@@ -1,6 +1,6 @@
 package com.mauriciotogneri.kernel.utils;
 
-public class NumberFormatter
+public class NumberUtils
 {
     private static final int DEFAULT_DECIMAL_PLACES = 3;
 

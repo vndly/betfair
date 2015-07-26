@@ -6,6 +6,7 @@ import com.mauriciotogneri.kernel.api.accounts.Login.LoginResponse;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.logs.ErrorLog;
+import com.mauriciotogneri.kernel.utils.StringUtils;
 
 public class SessionMonitor extends AbstractMonitor
 {
@@ -41,7 +42,7 @@ public class SessionMonitor extends AbstractMonitor
 
         if (keepAliveResponse.isValid())
         {
-            if (!session.getSessionToken().equals(keepAliveResponse.token))
+            if (StringUtils.notEquals(session.getSessionToken(), keepAliveResponse.token))
             {
                 session.setSessionToken(keepAliveResponse.token);
             }

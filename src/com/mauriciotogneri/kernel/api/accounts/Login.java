@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel.api.accounts;
 
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.utils.JsonUtils;
+import com.mauriciotogneri.kernel.utils.StringUtils;
 import com.squareup.okhttp.FormEncodingBuilder;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
@@ -46,7 +47,7 @@ public class Login
 
         public boolean isValid()
         {
-            return status.equals("SUCCESS");
+            return StringUtils.equals(status, "SUCCESS");
         }
     }
 }

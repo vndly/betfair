@@ -17,7 +17,7 @@ public class Config
     public class ConfigMonitor
     {
         public boolean enabled;
-        public String sportType;
+        public String eventType;
         public boolean inPlay;
         public String[] marketTypes;
     }

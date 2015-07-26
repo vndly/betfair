@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-public class TimeFormatter
+public class TimeUtils
 {
     private static final DateFormat logTimestamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
     private static final DateFormat fullTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");

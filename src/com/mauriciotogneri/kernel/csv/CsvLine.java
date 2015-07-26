@@ -1,6 +1,6 @@
 package com.mauriciotogneri.kernel.csv;
 
-import com.mauriciotogneri.kernel.utils.TimeFormatter;
+import com.mauriciotogneri.kernel.utils.TimeUtils;
 
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -11,7 +11,7 @@ public class CsvLine
     private boolean firstElement = true;
 
     private static final String SEPARATOR = ",";
-    private static final PeriodFormatter periodFormatter = TimeFormatter.getPeriodFormatter();
+    private static final PeriodFormatter periodFormatter = TimeUtils.getPeriodFormatter();
 
     public CsvLine appendTimestamp(long timestamp)
     {

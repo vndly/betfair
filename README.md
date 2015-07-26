@@ -12,7 +12,7 @@
     "monitors": [
         {
             "enabled": true,
-            "sportType": "1",
+            "eventType": "1",
             "inPlay": true,
             "marketTypes": [
                 "OVER_UNDER_15",
@@ -21,7 +21,7 @@
         },
         {
             "enabled": false,
-            "sportType": "2",
+            "eventType": "2",
             "inPlay": false,
             "marketTypes": [
                 "MATCH_ODDS"

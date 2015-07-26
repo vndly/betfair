@@ -52,7 +52,7 @@ public class Main
             {
                 if (monitor.enabled)
                 {
-                    EventMonitor eventMonitor = new EventMonitor(HttpClient.getDefault(), session, monitor.sportType, monitor.inPlay, monitor.marketTypes);
+                    EventMonitor eventMonitor = new EventMonitor(HttpClient.getDefault(), session, monitor.eventType, monitor.inPlay, monitor.marketTypes);
                     eventMonitor.start();
                 }
             }

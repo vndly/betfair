@@ -1,5 +1,6 @@
 package com.mauriciotogneri.kernel.monitors;
 
+import com.mauriciotogneri.kernel.Constants.Log;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.api.base.Types.Event;
@@ -76,28 +77,28 @@ public class EventMonitor extends AbstractMonitor
 
             if (addEvent(event.id))
             {
-                String folderPath = "logs/events/" + eventType + "/" + event.id;
+                String logFolderPath = Log.EVENT_LOG_PATH + eventType + "/" + event.id + "/";
 
                 ListMarketCatalogue.Response marketCatalogueResponse = ListMarketCatalogue.get(HttpClient.getDefault(), session, event.id, marketTypes);
 
                 for (MarketCatalogue marketCatalogue : marketCatalogueResponse)
                 {
-                    MarketMonitor marketMonitor = new MarketMonitor(HttpClient.getDefault(), session, folderPath, event, marketCatalogue);
+                    MarketMonitor marketMonitor = new MarketMonitor(HttpClient.getDefault(), session, logFolderPath + marketCatalogue.marketId + "/", event, eventType, marketCatalogue);
                     marketMonitor.start();
                 }
 
-                logEvent(event, folderPath);
+                logEvent(event, logFolderPath);
             }
         }
 
         return true;
     }
 
-    private void logEvent(Event event, String folderPath)
+    private void logEvent(Event event, String logFolderPath)
     {
         try
         {
-            IoUtils.writeFile(folderPath + "/info.log", JsonUtils.toJson(event));
+            IoUtils.writeFile(logFolderPath + Log.INFO_LOG_FILE, JsonUtils.toJson(event));
         }
         catch (IOException e)
         {
