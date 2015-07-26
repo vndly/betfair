@@ -23,11 +23,13 @@ public class StrategySoccerOverUnder15 extends Strategy
     private CsvFile logPrice;
     private CsvFile logActions;
 
-    private static final int END_FIRST_HALF = 1000 * 60 * 60; // beginning of second half (01:00:00)
-    private static final int END_SECOND_HALF = 1000 * 60 * 110; // beginning of second half (01:50:00)
-    private static final int MATCH_ALREADY_STARTED = 1000 * 60 * 10; // 10 minutes
+    private static final int END_FIRST_HALF = 1000 * 60 * 45; // end of first half (00:45:00)
+    private static final int END_HALF_TIME = 1000 * 60 * 60; // end of first half (01:00:00)
+    private static final int END_SECOND_HALF = 1000 * 60 * 110; // end of second half (01:50:00)
 
-    private static final int DEFAULT_STAKE = 2;
+    private static final double DEFAULT_STAKE = 2;
+    private static final double MIN_BACK_PRICE = 1.1;
+    private static final double MIN_LAY_PRICE = 1.02;
 
     private enum State
     {
@@ -50,12 +52,6 @@ public class StrategySoccerOverUnder15 extends Strategy
         logPrice.write(csvLine);
 
         logActions = new CsvFile(logFolderPath + Constants.Log.ACTIONS_LOG_FILE);
-    }
-
-    @Override
-    public boolean isValid(long timestamp)
-    {
-        return true; //TODO: timestamp < MATCH_ALREADY_STARTED;
     }
 
     @Override
@@ -96,28 +92,33 @@ public class StrategySoccerOverUnder15 extends Strategy
         switch (state)
         {
             case STARTED:
+
                 if (tick.allBackAvailable())
                 {
-                    Selection selectionBacked = tick.getLowestBack();
+                    Selection selection = tick.getLowestBack();
 
-                    initialBet = new Bet(selectionBacked.id, Side.BACK, selectionBacked.back, DEFAULT_STAKE);
+                    if ((selection.back >= MIN_BACK_PRICE) && (!isFirstHalfFinished(tick.timestamp)))
+                    {
+                        initialBet = new Bet(selection.id, Side.BACK, selection.back, DEFAULT_STAKE, selection.index);
 
-                    logBet(tick.timestamp, initialBet);
+                        logBet(tick.timestamp, initialBet);
 
-                    state = State.BACKED;
+                        state = State.BACKED;
+                    }
                 }
                 break;
 
             case BACKED:
-                if (isSecondHalf(tick.timestamp))
-                {
-                    double layPrice = tick.getLayPrice(initialBet.selectionId);
 
+                double layPrice = tick.getLayPrice(initialBet.selectionId);
+
+                if (isFirstHalfFinished(tick.timestamp) || (layPrice < MIN_LAY_PRICE))
+                {
                     if ((layPrice != 0) && (layPrice < initialBet.price))
                     {
                         double counterStake = NumberUtils.round((DEFAULT_STAKE * initialBet.price) / layPrice, 2);
 
-                        counterBet = new Bet(initialBet.selectionId, Side.LAY, layPrice, counterStake);
+                        counterBet = new Bet(initialBet.selectionId, Side.LAY, layPrice, counterStake, initialBet.selectionIndex);
 
                         logBet(tick.timestamp, counterBet);
 
@@ -129,7 +130,7 @@ public class StrategySoccerOverUnder15 extends Strategy
         }
     }
 
-    private boolean isSecondHalf(long timestamp)
+    private boolean isFirstHalfFinished(long timestamp)
     {
         return timestamp > END_FIRST_HALF;
     }

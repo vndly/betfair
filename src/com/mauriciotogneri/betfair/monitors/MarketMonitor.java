@@ -85,7 +85,7 @@ public class MarketMonitor extends AbstractMonitor
 
         strategy = Strategy.getStrategy(eventType, marketType, marketId, selections, logFolderPath);
 
-        return (marketBook != null) && (strategy != null) && (strategy.isValid(getCurrentMatchTime()));
+        return (marketBook != null) && (strategy != null);
     }
 
     @Override
@@ -119,8 +119,10 @@ public class MarketMonitor extends AbstractMonitor
         {
             Tick tick = new Tick(timestamp);
 
-            for (Long selectionId : selections)
+            for (int i = 0; i < selections.size(); i++)
             {
+                Long selectionId = selections.get(i);
+
                 double back = 0;
                 double lay = 0;
 
@@ -143,7 +145,7 @@ public class MarketMonitor extends AbstractMonitor
                     }
                 }
 
-                Selection selection = new Selection(selectionId, back, lay);
+                Selection selection = new Selection(selectionId, back, lay, i);
                 tick.add(selection);
             }
 

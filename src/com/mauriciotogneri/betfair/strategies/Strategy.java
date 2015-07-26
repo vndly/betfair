@@ -10,8 +10,6 @@ import java.util.List;
 
 public abstract class Strategy
 {
-    public abstract boolean isValid(long timestamp);
-
     public abstract void onClose(long timestamp) throws Exception;
 
     public abstract void process(Tick tick) throws Exception;
