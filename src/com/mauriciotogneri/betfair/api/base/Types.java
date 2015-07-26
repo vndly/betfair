@@ -1,9 +1,18 @@
 package com.mauriciotogneri.betfair.api.base;
 
+import com.mauriciotogneri.betfair.api.base.Enums.ExecutionReportErrorCode;
+import com.mauriciotogneri.betfair.api.base.Enums.ExecutionReportStatus;
+import com.mauriciotogneri.betfair.api.base.Enums.InstructionReportErrorCode;
+import com.mauriciotogneri.betfair.api.base.Enums.InstructionReportStatus;
 import com.mauriciotogneri.betfair.api.base.Enums.MarketStatus;
+import com.mauriciotogneri.betfair.api.base.Enums.OrderType;
+import com.mauriciotogneri.betfair.api.base.Enums.PersistenceType;
 import com.mauriciotogneri.betfair.api.base.Enums.PriceData;
 import com.mauriciotogneri.betfair.api.base.Enums.RollupModel;
 import com.mauriciotogneri.betfair.api.base.Enums.RunnerStatus;
+import com.mauriciotogneri.betfair.api.base.Enums.Side;
+import com.mauriciotogneri.betfair.models.Bet;
+import com.mauriciotogneri.betfair.models.BetInstruction;
 import com.mauriciotogneri.betfair.utils.NumberUtils;
 
 import java.util.ArrayList;
@@ -195,6 +204,119 @@ public class Types
         public Integer rollupLimit;
         public Double rollupLiabilityThreshold;
         public Integer rollupLiabilityFactor;
+    }
+
+    public static class PlaceInstruction
+    {
+        public OrderType orderType;
+        public long selectionId;
+        //public double handicap;
+        public Side side;
+        public LimitOrder limitOrder;
+        //public LimitOnCloseOrder limitOnCloseOrder;
+        //public MarketOnCloseOrder marketOnCloseOrder;
+
+        public PlaceInstruction(OrderType orderType, long selectionId, Side side, LimitOrder limitOrder)
+        {
+            this.orderType = orderType;
+            this.selectionId = selectionId;
+            this.side = side;
+            this.limitOrder = limitOrder;
+        }
+    }
+
+    public static class LimitOrder
+    {
+        public double size;
+        public double price;
+        public PersistenceType persistenceType;
+
+        public LimitOrder(double size, double price, PersistenceType persistenceType)
+        {
+            this.size = size;
+            this.price = price;
+            this.persistenceType = persistenceType;
+        }
+    }
+
+    public static class PlaceExecutionReport
+    {
+        public String customerRef = "";
+        public ExecutionReportStatus status;
+        public ExecutionReportErrorCode errorCode;
+        public String marketId = "";
+        public List<PlaceInstructionReport> instructionReports = new ArrayList<>();
+
+        public boolean isValid()
+        {
+            return (status == ExecutionReportStatus.SUCCESS) && (!instructionReports.isEmpty()) && (instructionReports.get(0).isValid());
+        }
+
+        public Bet getBet(BetInstruction betInstruction)
+        {
+            PlaceInstructionReport placeInstructionReport = instructionReports.get(0);
+
+            return new Bet(betInstruction, placeInstructionReport.betId, placeInstructionReport.placedDate, placeInstructionReport.averagePriceMatched, placeInstructionReport.sizeMatched, placeInstructionReport.isMatched());
+        }
+    }
+
+    public static class PlaceInstructionReport
+    {
+        public InstructionReportStatus status;
+        public InstructionReportErrorCode errorCode;
+        public PlaceInstruction instruction;
+        public String betId;
+        public String placedDate;
+        public double averagePriceMatched;
+        public double sizeMatched;
+
+        public boolean isValid()
+        {
+            return status == InstructionReportStatus.SUCCESS;
+        }
+
+        public boolean isMatched()
+        {
+            return sizeMatched == instruction.limitOrder.size;
+        }
+    }
+
+    public static class CancelInstruction
+    {
+        public String betId;
+
+        public CancelInstruction(String betId)
+        {
+            this.betId = betId;
+        }
+    }
+
+    public static class CancelExecutionReport
+    {
+        public String customerRef = "";
+        public ExecutionReportStatus status;
+        public ExecutionReportErrorCode errorCode;
+        public String marketId = "";
+        public List<CancelInstructionReport> instructionReports = new ArrayList<>();
+
+        public boolean isValid()
+        {
+            return (status == ExecutionReportStatus.SUCCESS) && (!instructionReports.isEmpty()) && (instructionReports.get(0).isValid());
+        }
+    }
+
+    public static class CancelInstructionReport
+    {
+        public InstructionReportStatus status;
+        public InstructionReportErrorCode errorCode;
+        public CancelInstruction instruction;
+        public double sizeCancelled;
+        public String cancelledDate;
+
+        public boolean isValid()
+        {
+            return status == InstructionReportStatus.SUCCESS;
+        }
     }
 
     public static class MarketCatalogue

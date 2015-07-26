@@ -83,7 +83,7 @@ public class MarketMonitor extends AbstractMonitor
             }
         }
 
-        strategy = Strategy.getStrategy(eventType, marketType, marketId, selections, logFolderPath);
+        strategy = Strategy.getStrategy(session, eventType, marketType, marketId, selections, logFolderPath);
 
         return (marketBook != null) && (strategy != null);
     }

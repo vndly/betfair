@@ -2,21 +2,23 @@ package com.mauriciotogneri.betfair.models;
 
 import com.mauriciotogneri.betfair.api.base.Enums.Side;
 
-public class Bet
+public class Bet extends BetInstruction
 {
-    public final long selectionId;
-    public final Side side;
-    public final double price;
-    public final double stake;
-    public final int selectionIndex;
+    public final String id;
+    public final String placedDate;
+    public final double averagePriceMatched;
+    public final double sizeMatched;
+    public final boolean isMatched;
 
-    public Bet(long selectionId, Side side, double price, double stake, int selectionIndex)
+    public Bet(BetInstruction betInstruction, String id, String placedDate, double averagePriceMatched, double sizeMatched, boolean isMatched)
     {
-        this.selectionId = selectionId;
-        this.side = side;
-        this.price = price;
-        this.stake = stake;
-        this.selectionIndex = selectionIndex;
+        super(betInstruction);
+
+        this.id = id;
+        this.placedDate = placedDate;
+        this.averagePriceMatched = averagePriceMatched;
+        this.sizeMatched = sizeMatched;
+        this.isMatched = isMatched;
     }
 
     public double ifWin()
@@ -45,6 +47,19 @@ public class Bet
 
     public String toString()
     {
-        return "Selection id: " + selectionId + " - Side: " + side + " - Price: " + price + " - Stake: " + stake + " - Selection index: " + selectionIndex;
+        StringBuilder builder = new StringBuilder();
+        builder.append("Bet id: ").append(id);
+        builder.append(" - Reference: ").append(getRef());
+        builder.append(" - Market id: ").append(marketId);
+        builder.append(" - Selection id: ").append(selectionId);
+        builder.append(" - Side: ").append(side);
+        builder.append(" - Price: ").append(price);
+        builder.append(" - Stake: ").append(stake);
+        builder.append(" - Placed date: ").append(placedDate);
+        builder.append(" - Avg. price matched: ").append(averagePriceMatched);
+        builder.append(" - Size matched: ").append(sizeMatched);
+        builder.append(" - Is matched: ").append(isMatched);
+
+        return builder.toString();
     }
 }

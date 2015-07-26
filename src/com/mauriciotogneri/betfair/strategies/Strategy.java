@@ -2,6 +2,7 @@ package com.mauriciotogneri.betfair.strategies;
 
 import com.mauriciotogneri.betfair.api.base.Enums.EventTypeEnum;
 import com.mauriciotogneri.betfair.api.base.Enums.MarketTypeEnum;
+import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.models.Tick;
 import com.mauriciotogneri.betfair.utils.StringUtils;
 
@@ -14,13 +15,13 @@ public abstract class Strategy
 
     public abstract void process(Tick tick) throws Exception;
 
-    public static Strategy getStrategy(String eventType, String marketType, String marketId, List<Long> selections, String folderPath) throws IOException
+    public static Strategy getStrategy(Session session, String eventType, String marketType, String marketId, List<Long> selections, String folderPath) throws IOException
     {
         if (StringUtils.equals(eventType, EventTypeEnum.SOCCER.toString()))
         {
             if (StringUtils.equals(marketType, MarketTypeEnum.OVER_UNDER_15.toString()))
             {
-                return new StrategySoccerOverUnder15(selections, folderPath);
+                return new StrategySoccerOverUnder15(session, marketId, selections, folderPath);
             }
         }
 
