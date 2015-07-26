@@ -35,7 +35,7 @@ public class MarketMonitor extends AbstractMonitor
     private ListMarketBook listMarketBook = null;
     private long eventStartTime = 0;
 
-    private List<Long> selections = new ArrayList<>();
+    private final List<Long> selections = new ArrayList<>();
 
     private static final int WAITING_TIME = 250; // 4 times per second (in milliseconds)
 

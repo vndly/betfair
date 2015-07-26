@@ -7,7 +7,7 @@ import org.joda.time.format.PeriodFormatter;
 
 public class CsvLine
 {
-    private StringBuilder builder = new StringBuilder();
+    private final StringBuilder builder = new StringBuilder();
     private boolean firstElement = true;
 
     private static final String SEPARATOR = ",";

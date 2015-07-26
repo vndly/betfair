@@ -1,5 +1,6 @@
 /out
 /.idea
 /logs
+/src/META-INF
 Betfair.iml
-config.properties
+config.json

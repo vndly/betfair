@@ -3,12 +3,34 @@ package com.mauriciotogneri.kernel.utils;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class IoUtils
 {
-    public static void writeToFile(String filePath, String content, boolean append) throws IOException
+    public static synchronized String readFile(String filePath) throws IOException
+    {
+        byte[] data = new byte[0];
+
+        FileInputStream fileInputStream = null;
+
+        try
+        {
+            File file = new File(filePath);
+            fileInputStream = new FileInputStream(new File(filePath));
+            data = new byte[(int) file.length()];
+            fileInputStream.read(data);
+        }
+        finally
+        {
+            closeResource(fileInputStream);
+        }
+
+        return new String(data, "UTF-8");
+    }
+
+    public static synchronized void writeFile(String filePath, String content, boolean append) throws IOException
     {
         File file = new File(filePath);
 
@@ -30,9 +52,9 @@ public class IoUtils
         }
     }
 
-    public static void writeToFile(String filePath, String content) throws IOException
+    public static synchronized void writeFile(String filePath, String content) throws IOException
     {
-        writeToFile(filePath, content, false);
+        writeFile(filePath, content, false);
     }
 
     public static synchronized boolean createFile(String filePath) throws IOException

@@ -5,8 +5,8 @@ import java.util.List;
 
 public class Tick
 {
-    public long timestamp;
-    public List<Selection> selections = new ArrayList<>();
+    public final long timestamp;
+    public final List<Selection> selections = new ArrayList<>();
 
     public Tick(long timestamp)
     {

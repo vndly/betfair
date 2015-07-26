@@ -11,16 +11,16 @@ import java.util.TimeZone;
 
 public class TimeFormatter
 {
-    private static final DateFormat timestampFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+    private static final DateFormat logTimestamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
+    private static final DateFormat fullTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
-    public static String getTimestamp()
+    public static synchronized String getTimestamp()
     {
-        return timestampFormat.format(new Date());
+        return logTimestamp.format(new Date());
     }
 
-    public static long dateToMilliseconds(String timestamp, String timeZone) throws ParseException
+    public static synchronized long dateToMilliseconds(String timestamp, String timeZone) throws ParseException
     {
-        DateFormat fullTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         fullTimestamp.setTimeZone(TimeZone.getTimeZone(timeZone));
 
         return fullTimestamp.parse(timestamp).getTime();

@@ -2,6 +2,7 @@ package com.mauriciotogneri.kernel.api.base;
 
 import com.mauriciotogneri.kernel.api.base.Types.MarketFilter;
 
+@SuppressWarnings("unused")
 public class ListCallParameters
 {
     private final MarketFilter filter;

@@ -9,7 +9,6 @@ import com.mauriciotogneri.kernel.api.base.Types.MarketFilter;
 import com.mauriciotogneri.kernel.api.base.Types.MarketFilter.Builder;
 import com.mauriciotogneri.kernel.api.betting.ListEvents.Response;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class ListEvents extends BettingRequest<Response, ListCallParameters>
@@ -35,7 +34,7 @@ public class ListEvents extends BettingRequest<Response, ListCallParameters>
     {
     }
 
-    public static ListEvents getRequest(HttpClient httpClient, Session session, boolean inPlay, String... eventTypes) throws IOException
+    public static ListEvents getRequest(HttpClient httpClient, Session session, boolean inPlay, String... eventTypes)
     {
         MarketFilter.Builder marketFilter = new Builder();
         marketFilter.setEventTypeIds(eventTypes);

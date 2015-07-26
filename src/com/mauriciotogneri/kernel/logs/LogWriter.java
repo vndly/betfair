@@ -30,13 +30,13 @@ public class LogWriter
         return result;
     }
 
-    public void write(String content) throws IOException
+    public synchronized void write(String content) throws IOException
     {
         bufferedWriter.write(content);
         bufferedWriter.flush();
     }
 
-    public void close()
+    public synchronized void close()
     {
         IoUtils.closeResource(bufferedWriter);
     }

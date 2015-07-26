@@ -6,7 +6,7 @@ import com.mauriciotogneri.kernel.logs.ErrorLog;
 
 public class JsonUtils
 {
-    private static Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public static String toJson(Object object)
     {

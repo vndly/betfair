@@ -2,9 +2,9 @@ package com.mauriciotogneri.kernel.models;
 
 public class Selection
 {
-    public long id;
-    public double back;
-    public double lay;
+    public final long id;
+    public final double back;
+    public final double lay;
 
     public Selection(long id, double back, double lay)
     {

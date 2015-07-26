@@ -48,12 +48,12 @@ public class EventMonitor extends AbstractMonitor
         return true;
     }
 
-    public synchronized boolean eventExists(String eventId)
+    private synchronized boolean eventExists(String eventId)
     {
         return eventsSet.contains(eventId);
     }
 
-    public synchronized boolean addEvent(String eventId)
+    private synchronized boolean addEvent(String eventId)
     {
         if (!eventExists(eventId))
         {
@@ -97,7 +97,7 @@ public class EventMonitor extends AbstractMonitor
     {
         try
         {
-            IoUtils.writeToFile(folderPath + "/info.log", JsonUtils.toJson(event));
+            IoUtils.writeFile(folderPath + "/info.log", JsonUtils.toJson(event));
         }
         catch (IOException e)
         {

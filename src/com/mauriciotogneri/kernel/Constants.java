@@ -14,4 +14,9 @@ public class Constants
             public static final boolean PRINT_RESPONSE = true;
         }
     }
+
+    public static class Log
+    {
+        public static final String ERROR_LOG_PATH = "logs/error.log";
+    }
 }

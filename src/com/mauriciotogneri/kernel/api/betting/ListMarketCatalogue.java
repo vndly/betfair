@@ -103,7 +103,7 @@ public class ListMarketCatalogue extends BettingRequest<Response, Parameters>
     {
     }
 
-    public static ListMarketCatalogue getRequest(HttpClient httpClient, Session session, String eventId, String... marketTypes) throws IOException
+    public static ListMarketCatalogue getRequest(HttpClient httpClient, Session session, String eventId, String... marketTypes)
     {
         MarketFilter.Builder marketFilter = new Builder();
         marketFilter.setEventIds(eventId);

@@ -8,7 +8,7 @@ import java.io.StringWriter;
 
 public class ErrorLog
 {
-    public static void log(String message)
+    public static synchronized void log(String message)
     {
         try
         {
@@ -20,7 +20,7 @@ public class ErrorLog
         }
     }
 
-    public static void log(Exception e)
+    public static synchronized void log(Exception e)
     {
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);

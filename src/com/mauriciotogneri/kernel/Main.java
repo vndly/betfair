@@ -1,20 +1,22 @@
 package com.mauriciotogneri.kernel;
 
+import com.mauriciotogneri.kernel.Constants.Log;
 import com.mauriciotogneri.kernel.api.accounts.Login;
 import com.mauriciotogneri.kernel.api.accounts.Login.LoginResponse;
-import com.mauriciotogneri.kernel.api.base.Enums.EventTypeEnum;
-import com.mauriciotogneri.kernel.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.kernel.api.base.HttpClient;
 import com.mauriciotogneri.kernel.api.base.Session;
 import com.mauriciotogneri.kernel.dependency.AppObjectProvider;
 import com.mauriciotogneri.kernel.dependency.CustomObjectProvider;
+import com.mauriciotogneri.kernel.models.Config;
+import com.mauriciotogneri.kernel.models.Config.ConfigLogin;
+import com.mauriciotogneri.kernel.models.Config.ConfigMonitor;
 import com.mauriciotogneri.kernel.monitors.EventMonitor;
 import com.mauriciotogneri.kernel.monitors.SessionMonitor;
+import com.mauriciotogneri.kernel.utils.IoUtils;
+import com.mauriciotogneri.kernel.utils.JsonUtils;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.util.List;
 
 public class Main
 {
@@ -26,41 +28,34 @@ public class Main
 
     private void init(String configFilePath) throws IOException
     {
-        InputStream input = new FileInputStream(configFilePath);
-        Properties properties = new Properties();
-        properties.load(input);
-        input.close();
-
-        CustomObjectProvider customObjectProvider = new CustomObjectProvider("logs/error.log");
+        CustomObjectProvider customObjectProvider = new CustomObjectProvider(Log.ERROR_LOG_PATH);
         AppObjectProvider.init(customObjectProvider);
 
-        String username = properties.getProperty("username");
-        String password = properties.getProperty("password");
-        String appKey = properties.getProperty("appkey");
+        Config config = JsonUtils.fromJson(IoUtils.readFile(configFilePath), Config.class);
 
-        run(username, password, appKey);
+        run(config.login, config.monitors);
     }
 
-    private void run(String username, String password, String appKey) throws IOException
+    private void run(ConfigLogin configLogin, List<ConfigMonitor> monitors) throws IOException
     {
         Login login = new Login(HttpClient.getDefault());
-        LoginResponse loginResponse = login.execute(username, password, appKey);
+        LoginResponse loginResponse = login.execute(configLogin.username, configLogin.password, configLogin.appKey);
 
-        Session session = new Session(appKey, loginResponse.token);
+        if (loginResponse.isValid())
+        {
+            Session session = new Session(configLogin.appKey, loginResponse.token);
 
-        String[] soccerMarkets = new String[1];
-        soccerMarkets[0] = MarketTypeEnum.OVER_UNDER_15.toString();
+            SessionMonitor sessionMonitor = new SessionMonitor(HttpClient.getDefault(), session, configLogin.username, configLogin.password);
+            sessionMonitor.start();
 
-        EventMonitor eventMonitorSoccer = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.SOCCER.toString(), true, soccerMarkets);
-        eventMonitorSoccer.start();
-
-        //EventMonitor eventMonitorTennis = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.TENNIS.toString(), true);
-        //eventMonitorTennis.start();
-
-        //EventMonitor eventMonitorHorse = new EventMonitor(HttpClient.getDefault(), session, EventTypeEnum.HORSE_RACING.toString(), false);
-        //eventMonitorHorse.start();
-
-        SessionMonitor sessionMonitor = new SessionMonitor(HttpClient.getDefault(), session, username, password);
-        sessionMonitor.start();
+            for (ConfigMonitor monitor : monitors)
+            {
+                if (monitor.enabled)
+                {
+                    EventMonitor eventMonitor = new EventMonitor(HttpClient.getDefault(), session, monitor.sportType, monitor.inPlay, monitor.marketTypes);
+                    eventMonitor.start();
+                }
+            }
+        }
     }
 }

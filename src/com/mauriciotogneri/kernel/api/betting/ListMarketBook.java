@@ -10,7 +10,6 @@ import com.mauriciotogneri.kernel.api.base.Types.ExBestOffersOverrides;
 import com.mauriciotogneri.kernel.api.base.Types.MarketBook;
 import com.mauriciotogneri.kernel.api.base.Types.PriceProjection;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,7 +91,7 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
     {
     }
 
-    public static ListMarketBook getRequest(HttpClient httpClient, Session session, String marketId) throws IOException
+    public static ListMarketBook getRequest(HttpClient httpClient, Session session, String marketId)
     {
         PriceProjection priceProjection = new PriceProjection(PriceData.EX_BEST_OFFERS);
         priceProjection.virtualise = true;
@@ -106,14 +105,5 @@ public class ListMarketBook extends BettingRequest<ListMarketBook.Response, List
         listMarketCatalogue.setParameters(parameters.build());
 
         return listMarketCatalogue;
-    }
-
-    public static MarketBook get(HttpClient httpClient, Session session, String marketId) throws IOException
-    {
-        ListMarketBook listMarketCatalogue = getRequest(httpClient, session, marketId);
-
-        ListMarketBook.Response response = listMarketCatalogue.execute();
-
-        return response.isEmpty() ? null : response.get(0);
     }
 }

@@ -14,7 +14,7 @@ public class CsvFile
         this.log = new LogWriter(filePath);
     }
 
-    public void write(CsvLine csvLine) throws IOException
+    public synchronized void write(CsvLine csvLine) throws IOException
     {
         if (!firstLine)
         {
