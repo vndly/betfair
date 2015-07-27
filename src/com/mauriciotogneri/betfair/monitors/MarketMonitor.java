@@ -103,11 +103,14 @@ public class MarketMonitor extends AbstractMonitor
 
         if (marketBook != null)
         {
-            CsvLine csvLine = new CsvLine();
-            csvLine.appendTimestamp(timestamp);
-            csvLine.append(marketBook.status.toString());
+            if (marketBook.status != MarketStatus.OPEN)
+            {
+                CsvLine csvLine = new CsvLine();
+                csvLine.appendTimestamp(timestamp);
+                csvLine.append(marketBook.status.toString());
 
-            logStatus.write(csvLine);
+                logStatus.write(csvLine);
+            }
         }
 
         if ((marketBook == null) || (marketBook.status == MarketStatus.CLOSED))

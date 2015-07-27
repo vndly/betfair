@@ -39,6 +39,7 @@ public class StrategySoccerOverUnder15 extends Strategy
     private CsvFile logPrice;
     private CsvFile logActions;
 
+    private static final int AFTER_10_MINUTES_PLAY = 1000 * 60 * 10; // 10 minutes of play (00:10:00)
     private static final int END_FIRST_HALF = 1000 * 60 * 45; // end of first half (00:45:00)
     private static final int END_HALF_TIME = 1000 * 60 * 60; // end of first half (01:00:00)
     private static final int END_SECOND_HALF = 1000 * 60 * 110; // end of second half (01:50:00)
@@ -126,7 +127,7 @@ public class StrategySoccerOverUnder15 extends Strategy
         {
             Selection selection = tick.getLowestBack();
 
-            if ((selection.back >= MIN_BACK_PRICE) && (selection.index == 1) && (!isFirstHalfFinished(tick.timestamp)))
+            if (makeBackBet(tick, selection))
             {
                 BetInstruction betInstruction = new BetInstruction(marketId, selection.id, Side.BACK, selection.back, DEFAULT_STAKE);
 
@@ -155,13 +156,18 @@ public class StrategySoccerOverUnder15 extends Strategy
         }
     }
 
+    private boolean makeBackBet(Tick tick, Selection selection)
+    {
+        return ((selection.back >= MIN_BACK_PRICE) && (selection.index == 1) && (!isFirstHalfFinished(tick.timestamp)) && isAfter10MinutesPlay(tick.timestamp));
+    }
+
     private void processBackedState(Tick tick) throws IOException
     {
         double layPrice = tick.getLayPrice(initialBet.selectionId);
 
         if (isFirstHalfFinished(tick.timestamp) || (layPrice < MIN_LAY_PRICE))
         {
-            if ((layPrice != 0) && (layPrice < initialBet.price))
+            if ((layPrice != 0) && (layPrice <= initialBet.price))
             {
                 double counterStake = NumberUtils.round((DEFAULT_STAKE * initialBet.price) / layPrice, 2);
 
@@ -226,6 +232,11 @@ public class StrategySoccerOverUnder15 extends Strategy
         return null;
     }
 
+    private boolean isAfter10MinutesPlay(long timestamp)
+    {
+        return timestamp > AFTER_10_MINUTES_PLAY;
+    }
+
     private boolean isFirstHalfFinished(long timestamp)
     {
         return timestamp > END_FIRST_HALF;
@@ -248,7 +259,7 @@ public class StrategySoccerOverUnder15 extends Strategy
     {
         CsvLine csvLine = new CsvLine();
         csvLine.appendTimestamp(timestamp);
-        csvLine.append("PROFIT: " + profit);
+        csvLine.append("PROFIT: " + NumberUtils.round(profit, 2));
         logActions.write(csvLine);
     }
 

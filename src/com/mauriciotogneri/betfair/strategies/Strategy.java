@@ -19,7 +19,11 @@ public abstract class Strategy
     {
         if (StringUtils.equals(eventType, EventTypeEnum.SOCCER.toString()))
         {
-            if (StringUtils.equals(marketType, MarketTypeEnum.OVER_UNDER_15.toString()))
+            if (StringUtils.equals(marketType, MarketTypeEnum.OVER_UNDER_05.toString()))
+            {
+                return new StrategySoccerOverUnder05(session, marketId, selections, folderPath);
+            }
+            else if (StringUtils.equals(marketType, MarketTypeEnum.OVER_UNDER_15.toString()))
             {
                 return new StrategySoccerOverUnder15(session, marketId, selections, folderPath);
             }
