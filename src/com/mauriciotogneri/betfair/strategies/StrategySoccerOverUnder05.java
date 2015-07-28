@@ -43,7 +43,7 @@ public class StrategySoccerOverUnder05 extends Strategy
     {
         Selection selection = tick.selections.get(1);
 
-        if (selection.back > maxBackPrice)
+        if ((tick.timestamp <= 0) && (selection.back > maxBackPrice))
         {
             maxBackPrice = selection.back;
 
@@ -63,7 +63,7 @@ public class StrategySoccerOverUnder05 extends Strategy
         {
             CsvLine csvLine = new CsvLine();
             csvLine.appendTimestamp(timestamp);
-            csvLine.append("0-0 YES");
+            csvLine.append("0-0 YES " + maxBackPrice);
 
             logPrice.write(csvLine);
         }
@@ -71,7 +71,7 @@ public class StrategySoccerOverUnder05 extends Strategy
         {
             CsvLine csvLine = new CsvLine();
             csvLine.appendTimestamp(timestamp);
-            csvLine.append("0-0 NO");
+            csvLine.append("0-0 NO  " + maxBackPrice);
 
             logPrice.write(csvLine);
         }
