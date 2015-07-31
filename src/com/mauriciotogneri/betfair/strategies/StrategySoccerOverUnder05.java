@@ -14,7 +14,7 @@ public class StrategySoccerOverUnder05 extends Strategy
 {
     private final String marketId;
     private final Session session;
-    private CsvFile logPrice;
+    private final CsvFile logPrice;
 
     private double maxBackPrice = 0;
 
@@ -25,8 +25,13 @@ public class StrategySoccerOverUnder05 extends Strategy
         this.session = session;
         this.marketId = marketId;
 
-        logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
 
+        initLogPrice(logPrice, selections);
+    }
+
+    private void initLogPrice(CsvFile logPrice, List<Long> selections) throws IOException
+    {
         CsvLine csvLine = new CsvLine();
         csvLine.separator();
 

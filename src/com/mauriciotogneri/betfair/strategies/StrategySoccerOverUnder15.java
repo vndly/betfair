@@ -36,8 +36,8 @@ public class StrategySoccerOverUnder15 extends Strategy
     private Bet initialBet = null;
     private Bet counterBet = null;
 
-    private CsvFile logPrice;
-    private CsvFile logActions;
+    private final CsvFile logPrice;
+    private final CsvFile logActions;
 
     private static final int AFTER_10_MINUTES_PLAY = 1000 * 60 * 10; // 10 minutes of play (00:10:00)
     private static final int END_FIRST_HALF = 1000 * 60 * 45; // end of first half (00:45:00)
@@ -58,8 +58,14 @@ public class StrategySoccerOverUnder15 extends Strategy
         this.session = session;
         this.marketId = marketId;
 
-        logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logActions = new CsvFile(logFolderPath + Constants.Log.ACTIONS_LOG_FILE);
 
+        initLogPrice(logPrice, selections);
+    }
+
+    private void initLogPrice(CsvFile logPrice, List<Long> selections) throws IOException
+    {
         CsvLine csvLine = new CsvLine();
         csvLine.separator();
 
@@ -70,8 +76,6 @@ public class StrategySoccerOverUnder15 extends Strategy
         }
 
         logPrice.write(csvLine);
-
-        logActions = new CsvFile(logFolderPath + Constants.Log.ACTIONS_LOG_FILE);
     }
 
     @Override

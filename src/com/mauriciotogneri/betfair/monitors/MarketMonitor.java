@@ -1,7 +1,9 @@
 package com.mauriciotogneri.betfair.monitors;
 
 import com.mauriciotogneri.betfair.Constants;
+import com.mauriciotogneri.betfair.api.base.Enums.EventTypeEnum;
 import com.mauriciotogneri.betfair.api.base.Enums.MarketStatus;
+import com.mauriciotogneri.betfair.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.api.base.Types.Event;
@@ -83,7 +85,7 @@ public class MarketMonitor extends AbstractMonitor
             }
         }
 
-        strategy = Strategy.getStrategy(session, eventType, marketType, marketId, selections, logFolderPath);
+        strategy = Strategy.getStrategy(session, EventTypeEnum.get(eventType), MarketTypeEnum.valueOf(marketType), marketId, selections, logFolderPath);
 
         return (marketBook != null) && (strategy != null);
     }

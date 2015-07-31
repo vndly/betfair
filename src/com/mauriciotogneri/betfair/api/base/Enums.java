@@ -1,5 +1,7 @@
 package com.mauriciotogneri.betfair.api.base;
 
+import com.mauriciotogneri.betfair.utils.StringUtils;
+
 @SuppressWarnings("unused")
 public class Enums
 {
@@ -24,6 +26,19 @@ public class Enums
         EventTypeEnum(String id)
         {
             this.id = id;
+        }
+
+        public static EventTypeEnum get(String code)
+        {
+            for (EventTypeEnum eventType : EventTypeEnum.values())
+            {
+                if (StringUtils.equals(code, eventType.toString()))
+                {
+                    return eventType;
+                }
+            }
+
+            return null;
         }
 
         public String toString()
