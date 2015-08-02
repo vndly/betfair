@@ -35,7 +35,7 @@ public class Main
 
     private void init(String configFilePath) throws IOException
     {
-        CustomObjectProvider customObjectProvider = new CustomObjectProvider(Log.ERROR_LOG_PATH);
+        CustomObjectProvider customObjectProvider = new CustomObjectProvider(Log.ERROR_LOG_PATH, Log.PROFIT_LOG_PATH, Log.ACTIVITY_LOG_PATH);
         AppObjectProvider.init(customObjectProvider);
 
         Config config = JsonUtils.fromJson(IoUtils.readFile(configFilePath), Config.class);

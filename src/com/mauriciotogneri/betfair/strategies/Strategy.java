@@ -14,7 +14,7 @@ public abstract class Strategy
 
     public abstract void process(Tick tick) throws Exception;
 
-    public static Strategy getStrategy(Session session, EventTypeEnum eventType, MarketTypeEnum marketType, String marketId, List<Long> selections, String folderPath) throws IOException
+    public static Strategy getStrategy(Session session, EventTypeEnum eventType, MarketTypeEnum marketType, String eventId, String marketId, List<Long> selections, String folderPath) throws IOException
     {
         switch (eventType)
         {
@@ -32,7 +32,7 @@ public abstract class Strategy
             case TENNIS:
                 if (marketType == MarketTypeEnum.MATCH_ODDS)
                 {
-                    return new StrategyTennisMatchOdds(session, marketId, selections, folderPath);
+                    return new StrategyTennisMatchOdds(session, eventId, marketId, selections, folderPath);
                 }
                 break;
         }

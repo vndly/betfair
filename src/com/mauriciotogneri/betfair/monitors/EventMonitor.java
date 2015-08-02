@@ -1,6 +1,7 @@
 package com.mauriciotogneri.betfair.monitors;
 
 import com.mauriciotogneri.betfair.Constants.Log;
+import com.mauriciotogneri.betfair.api.base.Enums.EventTypeEnum;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.api.base.Types.Event;
@@ -8,11 +9,13 @@ import com.mauriciotogneri.betfair.api.base.Types.EventResult;
 import com.mauriciotogneri.betfair.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.betfair.api.betting.ListEvents;
 import com.mauriciotogneri.betfair.api.betting.ListMarketCatalogue;
+import com.mauriciotogneri.betfair.logs.ActivityLog;
 import com.mauriciotogneri.betfair.logs.ErrorLog;
 import com.mauriciotogneri.betfair.utils.IoUtils;
 import com.mauriciotogneri.betfair.utils.JsonUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +52,18 @@ public class EventMonitor extends AbstractMonitor
         return true;
     }
 
+    @Override
+    protected void onPostExecute() throws Exception
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append("FINISHED EVENT MONITOR FOR ");
+        builder.append("TYPE: " + EventTypeEnum.get(eventType) + " - ");
+        builder.append("IN PLAY: " + inPlay + " - ");
+        builder.append("MARKETS: " + Arrays.toString(marketTypes));
+
+        ActivityLog.log(builder.toString());
+    }
+
     private synchronized boolean eventExists(String eventId)
     {
         return eventsSet.contains(eventId);
@@ -71,6 +86,8 @@ public class EventMonitor extends AbstractMonitor
     {
         ListEvents.Response listEventsResponse = listEvents.execute();
 
+        ActivityLog.log("PROCESSING EVENTS: " + JsonUtils.toJson(listEventsResponse, false));
+
         for (EventResult eventResult : listEventsResponse)
         {
             Event event = eventResult.event;
@@ -85,6 +102,8 @@ public class EventMonitor extends AbstractMonitor
                 {
                     MarketMonitor marketMonitor = new MarketMonitor(HttpClient.getDefault(), session, logFolderPath + marketCatalogue.marketId + "/", event, eventType, marketCatalogue);
                     marketMonitor.start();
+
+                    ActivityLog.log("STARTING MARKET MONITOR FOR: " + JsonUtils.toJson(event, false) + " - " + JsonUtils.toJson(marketCatalogue, false));
                 }
 
                 logEvent(event, logFolderPath);

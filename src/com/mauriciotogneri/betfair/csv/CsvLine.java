@@ -15,7 +15,7 @@ public class CsvLine
 
     public CsvLine appendTimestamp(long timestamp)
     {
-        if (timestamp > 0)
+        if (timestamp >= 0)
         {
             Period period = new Period(timestamp);
 

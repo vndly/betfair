@@ -7,4 +7,8 @@ import java.io.IOException;
 public interface ObjectProvider
 {
     LogWriter getErrorLog() throws IOException;
+
+    LogWriter getProfitLog() throws IOException;
+
+    LogWriter getActivityLog() throws IOException;
 }

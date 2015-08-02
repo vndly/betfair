@@ -4,20 +4,22 @@ import com.mauriciotogneri.betfair.Constants.Log;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.csv.CsvLine;
+import com.mauriciotogneri.betfair.logs.ProfitLog;
 import com.mauriciotogneri.betfair.models.Selection;
 import com.mauriciotogneri.betfair.models.Tick;
 import com.mauriciotogneri.betfair.utils.NumberUtils;
+import com.mauriciotogneri.betfair.utils.TimeUtils;
 
 import java.io.IOException;
 import java.util.List;
 
 public class StrategyTennisMatchOdds extends Strategy
 {
+    private final String eventId;
     private final String marketId;
     private final Session session;
 
     private final CsvFile logPrice;
-    private final CsvFile logProfit;
     private final CsvFile logActionsPlayerA;
     private final CsvFile logActionsPlayerB;
 
@@ -35,13 +37,13 @@ public class StrategyTennisMatchOdds extends Strategy
         PLAYER_B
     }
 
-    public StrategyTennisMatchOdds(Session session, String marketId, List<Long> selections, String logFolderPath) throws IOException
+    public StrategyTennisMatchOdds(Session session, String eventId, String marketId, List<Long> selections, String logFolderPath) throws IOException
     {
         this.session = session;
+        this.eventId = eventId;
         this.marketId = marketId;
 
         this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
-        this.logProfit = new CsvFile(logFolderPath + "profit.csv");
         this.logActionsPlayerA = new CsvFile(logFolderPath + "actionsA.csv");
         this.logActionsPlayerB = new CsvFile(logFolderPath + "actionsB.csv");
 
@@ -97,21 +99,22 @@ public class StrategyTennisMatchOdds extends Strategy
         {
             if (validBack(selection.back, selection.lay))
             {
-                betSimulation.placeBackBet(selection.back);
+                betSimulation.placeBackBet(selection.back, timestamp);
 
-                addAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
             }
         }
         else if (validLay(betSimulation.priceBack, selection.lay))
         {
-            betSimulation.placeLayBet(selection.lay);
+            betSimulation.placeLayBet(selection.lay, timestamp);
 
-            addAction(player, timestamp, "LAID AT:   " + selection.lay);
+            logAction(player, timestamp, "LAID AT:   " + selection.lay);
         }
     }
 
-    // TODO: add restriction of time?
-    // TODO: add maximum price value?
+    // TODO: add restriction of time? => e.g. don't back after 1 hour of play
+    // TODO: wait for 3 consecutive readings before to back?
+    // TODO: add maximum price value? => e.g. don't back if the price is bigger than 10
     private boolean validBack(double priceBack, double priceLay)
     {
         return (priceBack >= MIN_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF);
@@ -122,7 +125,7 @@ public class StrategyTennisMatchOdds extends Strategy
         return (priceLay < priceBack) && (priceLay > 0);
     }
 
-    private void addAction(Player player, long timestamp, String text) throws IOException
+    private void logAction(Player player, long timestamp, String text) throws IOException
     {
         CsvLine csvLine = new CsvLine();
         csvLine.appendTimestamp(timestamp);
@@ -138,14 +141,6 @@ public class StrategyTennisMatchOdds extends Strategy
                 logActionsPlayerB.write(csvLine);
                 break;
         }
-    }
-
-    private void addProfit(double value) throws IOException
-    {
-        CsvLine csvLine = new CsvLine();
-        csvLine.append("PROFIT: " + value);
-
-        logProfit.write(csvLine);
     }
 
     private double calculateProfit(BetSimulation betSimulation)
@@ -168,34 +163,58 @@ public class StrategyTennisMatchOdds extends Strategy
         return 0;
     }
 
+    private void logProfit(long timestamp, double profit, BetSimulation betSimulation) throws IOException
+    {
+        CsvLine csvLine = new CsvLine();
+        csvLine.append(TimeUtils.getTimestamp());
+        csvLine.appendTimestamp(timestamp);
+        csvLine.append(profit);
+        csvLine.append(eventId);
+        csvLine.append(marketId);
+
+        csvLine.appendTimestamp(betSimulation.timestampBack);
+        csvLine.append(betSimulation.priceBack);
+        csvLine.append(betSimulation.stakeBack);
+
+        csvLine.appendTimestamp(betSimulation.timestampLay);
+        csvLine.append(betSimulation.priceLay);
+        csvLine.append(betSimulation.stakeLay);
+
+        ProfitLog.log(csvLine.toString());
+    }
+
     @Override
     public void onClose(long timestamp) throws Exception
     {
         double profitPlayerA = calculateProfit(betSimulationPlayerA);
-        addProfit(profitPlayerA);
+        logProfit(timestamp, profitPlayerA, betSimulationPlayerA);
 
         double profitPlayerB = calculateProfit(betSimulationPlayerB);
-        addProfit(profitPlayerB);
+        logProfit(timestamp, profitPlayerB, betSimulationPlayerB);
     }
 
     private static class BetSimulation
     {
         public double priceBack = 0;
         public double stakeBack = 0;
+        public long timestampBack = 0;
 
         public double priceLay = 0;
         public double stakeLay = 0;
+        public long timestampLay = 0;
 
-        public void placeBackBet(double price)
+        public void placeBackBet(double price, long timestamp)
         {
             priceBack = price;
             stakeBack = DEFAULT_STAKE;
+            timestampBack = timestamp;
         }
 
-        public void placeLayBet(double price)
+        public void placeLayBet(double price, long timestamp)
         {
             priceLay = price;
-            stakeLay = (stakeBack * priceBack) / priceLay;
+            stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
+            timestampLay = timestamp;
         }
     }
 }

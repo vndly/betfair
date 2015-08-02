@@ -17,4 +17,14 @@ public class AppObjectProvider
     {
         return instance.getErrorLog();
     }
+
+    public static LogWriter getProfitLog() throws IOException
+    {
+        return instance.getProfitLog();
+    }
+
+    public static LogWriter getActivityLog() throws IOException
+    {
+        return instance.getActivityLog();
+    }
 }
