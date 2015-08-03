@@ -16,6 +16,8 @@ public class TimeUtils
 
     public static synchronized String getTimestamp()
     {
+        logTimestamp.setTimeZone(TimeZone.getTimeZone("Europe/Zurich"));
+
         return logTimestamp.format(new Date());
     }
 

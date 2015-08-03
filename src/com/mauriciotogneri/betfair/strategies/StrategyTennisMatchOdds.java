@@ -7,6 +7,7 @@ import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.logs.ProfitLog;
 import com.mauriciotogneri.betfair.models.Selection;
 import com.mauriciotogneri.betfair.models.Tick;
+import com.mauriciotogneri.betfair.models.Wallet;
 import com.mauriciotogneri.betfair.utils.NumberUtils;
 import com.mauriciotogneri.betfair.utils.TimeUtils;
 
@@ -23,10 +24,16 @@ public class StrategyTennisMatchOdds extends Strategy
     private final CsvFile logActionsPlayerA;
     private final CsvFile logActionsPlayerB;
 
+    private int consecutiveValidBacks = 0;
+
     private final BetSimulation betSimulationPlayerA = new BetSimulation();
     private final BetSimulation betSimulationPlayerB = new BetSimulation();
 
+    private static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
+
     private static final double MIN_BACK_PRICE = 1.1;
+    private static final double MAX_BACK_PRICE = 4.0;
+
     private static final double MAX_PRICE_DIFF = 1.1;
     private static final double DEFAULT_STAKE = 2;
     private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
@@ -64,8 +71,6 @@ public class StrategyTennisMatchOdds extends Strategy
         logPrice.write(csvLine);
     }
 
-    // don't back if price is 34.00 and lay is 110.00
-
     @Override
     public void process(Tick tick) throws Exception
     {
@@ -99,9 +104,25 @@ public class StrategyTennisMatchOdds extends Strategy
         {
             if (validBack(selection.back, selection.lay))
             {
-                betSimulation.placeBackBet(selection.back, timestamp);
+                consecutiveValidBacks++;
 
-                logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                if (consecutiveValidBacks >= MIN_CONSECUTIVE_VALID_BACKS)
+                {
+                    double budget = DEFAULT_STAKE + (selection.back * 2);
+
+                    if (Wallet.getInstance().requestBudget(budget))
+                    {
+                        consecutiveValidBacks = 0;
+
+                        betSimulation.placeBackBet(selection.back, timestamp);
+
+                        logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                    }
+                }
+            }
+            else
+            {
+                consecutiveValidBacks = 0;
             }
         }
         else if (validLay(betSimulation.priceBack, selection.lay))
@@ -113,11 +134,9 @@ public class StrategyTennisMatchOdds extends Strategy
     }
 
     // TODO: add restriction of time? => e.g. don't back after 1 hour of play
-    // TODO: wait for 3 consecutive readings before to back?
-    // TODO: add maximum price value? => e.g. don't back if the price is bigger than 10
     private boolean validBack(double priceBack, double priceLay)
     {
-        return (priceBack >= MIN_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF);
+        return (priceBack >= MIN_BACK_PRICE) && (priceBack <= MAX_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF);
     }
 
     private boolean validLay(double priceBack, double priceLay)
@@ -143,28 +162,10 @@ public class StrategyTennisMatchOdds extends Strategy
         }
     }
 
-    private double calculateProfit(BetSimulation betSimulation)
+    private void logProfit(long timestamp, BetSimulation betSimulation) throws IOException
     {
-        if (betSimulation.priceBack != 0)
-        {
-            if (betSimulation.priceLay != 0)
-            {
-                double ifWin = (betSimulation.stakeBack * betSimulation.priceBack) - betSimulation.stakeBack;
-                double ifLose = (betSimulation.stakeLay * betSimulation.priceLay) - betSimulation.stakeLay;
+        double profit = betSimulation.getProfit();
 
-                return NumberUtils.round(ifWin - ifLose, 2);
-            }
-            else
-            {
-                return -betSimulation.stakeBack; // we assume that we lose the bet
-            }
-        }
-
-        return 0;
-    }
-
-    private void logProfit(long timestamp, double profit, BetSimulation betSimulation) throws IOException
-    {
         CsvLine csvLine = new CsvLine();
         csvLine.append(TimeUtils.getTimestamp());
         csvLine.appendTimestamp(timestamp);
@@ -181,16 +182,19 @@ public class StrategyTennisMatchOdds extends Strategy
         csvLine.append(betSimulation.stakeLay);
 
         ProfitLog.log(csvLine.toString());
+
+        if (profit > 0)
+        {
+            Wallet.getInstance().addProfit(profit + DEFAULT_STAKE);
+        }
     }
 
     @Override
     public void onClose(long timestamp) throws Exception
     {
-        double profitPlayerA = calculateProfit(betSimulationPlayerA);
-        logProfit(timestamp, profitPlayerA, betSimulationPlayerA);
+        logProfit(timestamp, betSimulationPlayerA);
 
-        double profitPlayerB = calculateProfit(betSimulationPlayerB);
-        logProfit(timestamp, profitPlayerB, betSimulationPlayerB);
+        logProfit(timestamp, betSimulationPlayerB);
     }
 
     private static class BetSimulation
@@ -215,6 +219,26 @@ public class StrategyTennisMatchOdds extends Strategy
             priceLay = price;
             stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
             timestampLay = timestamp;
+        }
+
+        public double getProfit()
+        {
+            if (priceBack != 0)
+            {
+                if (priceLay != 0)
+                {
+                    double ifWin = (stakeBack * priceBack) - stakeBack;
+                    double ifLose = (stakeLay * priceLay) - stakeLay;
+
+                    return NumberUtils.round(ifWin - ifLose, 2);
+                }
+                else
+                {
+                    return -stakeBack; // we assume that we lose the bet
+                }
+            }
+
+            return 0;
         }
     }
 }

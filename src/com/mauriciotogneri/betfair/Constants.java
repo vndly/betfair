@@ -20,6 +20,7 @@ public class Constants
         public static final String BASE_LOG_PATH = "logs/";
         public static final String ERROR_LOG_PATH = BASE_LOG_PATH + "error.log";
         public static final String PROFIT_LOG_PATH = BASE_LOG_PATH + "profit.csv";
+        public static final String WALLET_LOG_PATH = BASE_LOG_PATH + "wallet.csv";
         public static final String ACTIVITY_LOG_PATH = BASE_LOG_PATH + "activity.log";
         public static final String EVENT_LOG_PATH = BASE_LOG_PATH + "events/";
 
