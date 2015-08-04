@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class Strategy
 {
-    public abstract void onClose(long timestamp) throws Exception;
+    public abstract void onClose(long timestamp, boolean executed) throws Exception;
 
     public abstract void process(Tick tick) throws Exception;
 

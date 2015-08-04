@@ -62,7 +62,7 @@ public class StrategySoccerOverUnder05 extends Strategy
     }
 
     @Override
-    public void onClose(long timestamp) throws Exception
+    public void onClose(long timestamp, boolean executed) throws Exception
     {
         if (timestamp > END_SECOND_HALF)
         {

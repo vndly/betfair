@@ -20,16 +20,16 @@ public class ProfitLog
     private static synchronized void logHeader()
     {
         StringBuilder builder = new StringBuilder();
-        builder.append("TIME;");
-        builder.append("MATCH TIME;");
-        builder.append("PROFIT;");
-        builder.append("EVENT ID;");
-        builder.append("MARKET ID;");
-        builder.append("BACK TIME;");
-        builder.append("BACK PRICE;");
-        builder.append("BACK STEAK;");
-        builder.append("LAY TIME;");
-        builder.append("LAY PRICE;");
+        builder.append("TIME,");
+        builder.append("MATCH TIME,");
+        builder.append("PROFIT,");
+        builder.append("EVENT ID,");
+        builder.append("MARKET ID,");
+        builder.append("BACK TIME,");
+        builder.append("BACK PRICE,");
+        builder.append("BACK STEAK,");
+        builder.append("LAY TIME,");
+        builder.append("LAY PRICE,");
         builder.append("LAY STEAK\n");
 
         write(builder.toString());

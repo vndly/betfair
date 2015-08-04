@@ -5,6 +5,7 @@ import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.logs.ProfitLog;
+import com.mauriciotogneri.betfair.models.Budget;
 import com.mauriciotogneri.betfair.models.Selection;
 import com.mauriciotogneri.betfair.models.Tick;
 import com.mauriciotogneri.betfair.models.Wallet;
@@ -108,9 +109,9 @@ public class StrategyTennisMatchOdds extends Strategy
 
                 if (consecutiveValidBacks >= MIN_CONSECUTIVE_VALID_BACKS)
                 {
-                    double budget = DEFAULT_STAKE + (selection.back * 2);
+                    betSimulation.requestBudget(selection.back * DEFAULT_STAKE);
 
-                    if (Wallet.getInstance().requestBudget(budget))
+                    if (Wallet.getInstance().requestBudget(betSimulation.getBudget()))
                     {
                         consecutiveValidBacks = 0;
 
@@ -183,22 +184,30 @@ public class StrategyTennisMatchOdds extends Strategy
 
         ProfitLog.log(csvLine.toString());
 
-        if (profit > 0)
+        if (profit >= 0)
         {
-            Wallet.getInstance().addProfit(profit + DEFAULT_STAKE);
+            Wallet.getInstance().addProfit(profit + betSimulation.getBudget().getRequested());
+        }
+        else
+        {
+            Wallet.getInstance().addProfit(betSimulation.getBudget().getRest());
         }
     }
 
     @Override
-    public void onClose(long timestamp) throws Exception
+    public void onClose(long timestamp, boolean executed) throws Exception
     {
-        logProfit(timestamp, betSimulationPlayerA);
-
-        logProfit(timestamp, betSimulationPlayerB);
+        if (executed)
+        {
+            logProfit(timestamp, betSimulationPlayerA);
+            logProfit(timestamp, betSimulationPlayerB);
+        }
     }
 
     private static class BetSimulation
     {
+        private Budget budget = null;
+
         public double priceBack = 0;
         public double stakeBack = 0;
         public long timestampBack = 0;
@@ -212,6 +221,9 @@ public class StrategyTennisMatchOdds extends Strategy
             priceBack = price;
             stakeBack = DEFAULT_STAKE;
             timestampBack = timestamp;
+
+            // TODO: if bet is placed
+            budget.use(stakeBack);
         }
 
         public void placeLayBet(double price, long timestamp)
@@ -219,6 +231,10 @@ public class StrategyTennisMatchOdds extends Strategy
             priceLay = price;
             stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
             timestampLay = timestamp;
+
+            // TODO: if bet is placed
+            double liability = (priceLay * stakeLay) * stakeLay;
+            budget.use(liability);
         }
 
         public double getProfit()
@@ -239,6 +255,21 @@ public class StrategyTennisMatchOdds extends Strategy
             }
 
             return 0;
+        }
+
+        public Budget getBudget()
+        {
+            return budget;
+        }
+
+        public void requestBudget(double amount)
+        {
+            budget = new Budget(amount);
+        }
+
+        public void returnBudget()
+        {
+            // TODO
         }
     }
 }

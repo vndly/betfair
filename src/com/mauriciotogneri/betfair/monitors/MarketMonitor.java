@@ -87,13 +87,15 @@ public class MarketMonitor extends AbstractMonitor
 
         strategy = Strategy.getStrategy(session, EventTypeEnum.get(eventType), MarketTypeEnum.valueOf(marketType), event.id, marketId, selections, logFolderPath);
 
-        return (marketBook != null) && (strategy != null);
+        long currentMatchTime = getCurrentMatchTime();
+
+        return (marketBook != null) && (strategy != null) && (currentMatchTime < 0);
     }
 
     @Override
-    protected void onPostExecute() throws Exception
+    protected void onPostExecute(boolean executed) throws Exception
     {
-        strategy.onClose(getCurrentMatchTime());
+        strategy.onClose(getCurrentMatchTime(), executed);
     }
 
     @Override

@@ -53,7 +53,7 @@ public class EventMonitor extends AbstractMonitor
     }
 
     @Override
-    protected void onPostExecute() throws Exception
+    protected void onPostExecute(boolean executed) throws Exception
     {
         StringBuilder builder = new StringBuilder();
         builder.append("FINISHED EVENT MONITOR FOR ");

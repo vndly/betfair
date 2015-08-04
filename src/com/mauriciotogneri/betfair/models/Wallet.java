@@ -33,19 +33,19 @@ public class Wallet
         return instance;
     }
 
-    public synchronized boolean requestBudget(double budget) throws IOException
+    public synchronized boolean requestBudget(Budget budget) throws IOException
     {
-        if (balance >= budget)
+        if (balance >= budget.getRequested())
         {
-            balance -= budget;
+            balance -= budget.getRequested();
 
-            log("REQUEST OK", budget, balance);
+            log("REQUEST OK", budget.getRequested(), balance);
 
             return true;
         }
         else
         {
-            log("REQUEST FAIL", budget, balance);
+            log("REQUEST FAIL", budget.getRequested(), balance);
         }
 
         return false;

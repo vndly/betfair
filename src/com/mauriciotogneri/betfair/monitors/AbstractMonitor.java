@@ -25,7 +25,7 @@ public abstract class AbstractMonitor extends Thread
         return true;
     }
 
-    protected void onPostExecute() throws Exception
+    protected void onPostExecute(boolean executed) throws Exception
     {
     }
 
@@ -34,10 +34,14 @@ public abstract class AbstractMonitor extends Thread
     @Override
     public void run()
     {
+        boolean executed = false;
+
         try
         {
             if (onPreExecute())
             {
+                executed = true;
+
                 int waitingTime = getWaitTime();
                 boolean continueExecuting = true;
 
@@ -76,7 +80,7 @@ public abstract class AbstractMonitor extends Thread
         {
             try
             {
-                onPostExecute();
+                onPostExecute(executed);
             }
             catch (Exception e)
             {

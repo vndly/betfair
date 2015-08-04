@@ -79,7 +79,7 @@ public class StrategySoccerOverUnder15 extends Strategy
     }
 
     @Override
-    public void onClose(long timestamp) throws Exception
+    public void onClose(long timestamp, boolean executed) throws Exception
     {
         if (initialBet != null)
         {
