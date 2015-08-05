@@ -39,30 +39,31 @@ public class Wallet
         {
             balance -= budget.getRequested();
 
-            log("REQUEST OK", budget.getRequested(), balance);
+            log("REQUEST OK", budget.getId(), budget.getRequested(), balance);
 
             return true;
         }
         else
         {
-            log("REQUEST FAIL", budget.getRequested(), balance);
+            log("REQUEST FAIL", budget.getId(), budget.getRequested(), balance);
         }
 
         return false;
     }
 
-    public synchronized void addProfit(double profit) throws IOException
+    public synchronized void addProfit(int budgetId, double profit) throws IOException
     {
         balance += profit;
 
-        log("PROFIT", profit, balance);
+        log("PROFIT", budgetId, profit, balance);
     }
 
-    private synchronized void log(String type, double value, double balance) throws IOException
+    private synchronized void log(String type, int budgetId, double value, double balance) throws IOException
     {
         CsvLine csvLine = new CsvLine();
         csvLine.append(TimeUtils.getTimestamp());
         csvLine.append(type);
+        csvLine.append(budgetId);
         csvLine.append(NumberUtils.round(value, 2));
         csvLine.append(NumberUtils.round(balance, 2));
 

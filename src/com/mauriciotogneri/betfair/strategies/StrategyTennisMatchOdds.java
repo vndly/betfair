@@ -38,6 +38,7 @@ public class StrategyTennisMatchOdds extends Strategy
     private static final double MAX_PRICE_DIFF = 1.1;
     private static final double DEFAULT_STAKE = 2;
     private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
+    private static final int ONE_HOUR_AND_HALF_OF_PLAY = 1000 * 60 * 90; // one hour and half (01:30:00)
 
     private enum Player
     {
@@ -103,7 +104,7 @@ public class StrategyTennisMatchOdds extends Strategy
     {
         if (betSimulation.priceBack == 0)
         {
-            if (validBack(selection.back, selection.lay))
+            if (validBack(selection.back, selection.lay, timestamp))
             {
                 consecutiveValidBacks++;
 
@@ -134,10 +135,9 @@ public class StrategyTennisMatchOdds extends Strategy
         }
     }
 
-    // TODO: add restriction of time? => e.g. don't back after 1 hour of play
-    private boolean validBack(double priceBack, double priceLay)
+    private boolean validBack(double priceBack, double priceLay, long timestamp)
     {
-        return (priceBack >= MIN_BACK_PRICE) && (priceBack <= MAX_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF);
+        return (priceBack >= MIN_BACK_PRICE) && (priceBack <= MAX_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF) && (timestamp <= ONE_HOUR_AND_HALF_OF_PLAY);
     }
 
     private boolean validLay(double priceBack, double priceLay)
@@ -186,11 +186,11 @@ public class StrategyTennisMatchOdds extends Strategy
 
         if (profit >= 0)
         {
-            Wallet.getInstance().addProfit(profit + betSimulation.getBudget().getRequested());
+            Wallet.getInstance().addProfit(betSimulation.getBudget().getId(), profit + betSimulation.getBudget().getRequested());
         }
         else
         {
-            Wallet.getInstance().addProfit(betSimulation.getBudget().getRest());
+            Wallet.getInstance().addProfit(betSimulation.getBudget().getId(), betSimulation.getBudget().getRest());
         }
     }
 
@@ -265,11 +265,6 @@ public class StrategyTennisMatchOdds extends Strategy
         public void requestBudget(double amount)
         {
             budget = new Budget(amount);
-        }
-
-        public void returnBudget()
-        {
-            // TODO
         }
     }
 }
