@@ -1,5 +1,6 @@
 package com.mauriciotogneri.betfair.dependency;
 
+import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.logs.LogWriter;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class AppObjectProvider
         return instance.getErrorLog();
     }
 
-    public static LogWriter getProfitLog() throws IOException
+    public static CsvFile getProfitLog() throws IOException
     {
         return instance.getProfitLog();
     }
@@ -26,5 +27,10 @@ public class AppObjectProvider
     public static LogWriter getActivityLog() throws IOException
     {
         return instance.getActivityLog();
+    }
+
+    public static CsvFile getFundsLog() throws IOException
+    {
+        return instance.getFundsLog();
     }
 }

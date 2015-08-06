@@ -1,8 +1,12 @@
 package com.mauriciotogneri.betfair.monitors;
 
+import com.mauriciotogneri.betfair.Constants.Execution;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.logs.ErrorLog;
+import com.mauriciotogneri.betfair.utils.IoUtils;
+
+import java.io.IOException;
 
 public abstract class AbstractMonitor extends Thread
 {
@@ -87,6 +91,20 @@ public abstract class AbstractMonitor extends Thread
                 // ignore
             }
         }
+    }
+
+    protected boolean isRunning()
+    {
+        try
+        {
+            return !IoUtils.isFileFilled(Execution.IS_RUNNING_FLAG);
+        }
+        catch (IOException e)
+        {
+            ErrorLog.log(e);
+        }
+
+        return true;
     }
 
     private void threadSleep(long milliseconds)

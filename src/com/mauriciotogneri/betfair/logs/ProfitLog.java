@@ -1,12 +1,13 @@
 package com.mauriciotogneri.betfair.logs;
 
+import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.dependency.AppObjectProvider;
 
 public class ProfitLog
 {
     private static boolean firstLog = true;
 
-    public static synchronized void log(String message)
+    public static synchronized void log(CsvLine csvLine)
     {
         if (firstLog)
         {
@@ -14,32 +15,32 @@ public class ProfitLog
             logHeader();
         }
 
-        write(message + "\n");
+        write(csvLine);
     }
 
     private static synchronized void logHeader()
     {
-        StringBuilder builder = new StringBuilder();
-        builder.append("TIME,");
-        builder.append("MATCH TIME,");
-        builder.append("PROFIT,");
-        builder.append("EVENT ID,");
-        builder.append("MARKET ID,");
-        builder.append("BACK TIME,");
-        builder.append("BACK PRICE,");
-        builder.append("BACK STEAK,");
-        builder.append("LAY TIME,");
-        builder.append("LAY PRICE,");
-        builder.append("LAY STEAK\n");
+        CsvLine csvLine = new CsvLine();
+        csvLine.append("TIME");
+        csvLine.append("MATCH TIME");
+        csvLine.append("PROFIT");
+        csvLine.append("EVENT ID");
+        csvLine.append("MARKET ID");
+        csvLine.append("BACK TIME");
+        csvLine.append("BACK PRICE");
+        csvLine.append("BACK STEAK");
+        csvLine.append("LAY TIME");
+        csvLine.append("LAY PRICE");
+        csvLine.append("LAY STEAK");
 
-        write(builder.toString());
+        write(csvLine);
     }
 
-    private static synchronized void write(String message)
+    private static synchronized void write(CsvLine csvLine)
     {
         try
         {
-            AppObjectProvider.getProfitLog().write(message);
+            AppObjectProvider.getProfitLog().write(csvLine);
         }
         catch (Exception e)
         {

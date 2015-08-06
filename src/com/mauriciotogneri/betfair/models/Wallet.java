@@ -4,7 +4,6 @@ import com.mauriciotogneri.betfair.Constants;
 import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.utils.NumberUtils;
-import com.mauriciotogneri.betfair.utils.TimeUtils;
 
 import java.io.IOException;
 
@@ -61,7 +60,7 @@ public class Wallet
     private synchronized void log(String type, int budgetId, double value, double balance) throws IOException
     {
         CsvLine csvLine = new CsvLine();
-        csvLine.append(TimeUtils.getTimestamp());
+        csvLine.appendCurrentTimestamp();
         csvLine.append(type);
         csvLine.append(budgetId);
         csvLine.append(NumberUtils.round(value, 2));

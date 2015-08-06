@@ -57,9 +57,9 @@ public class EventMonitor extends AbstractMonitor
     {
         StringBuilder builder = new StringBuilder();
         builder.append("FINISHED EVENT MONITOR FOR ");
-        builder.append("TYPE: " + EventTypeEnum.get(eventType) + " - ");
-        builder.append("IN PLAY: " + inPlay + " - ");
-        builder.append("MARKETS: " + Arrays.toString(marketTypes));
+        builder.append("TYPE: ").append(EventTypeEnum.get(eventType)).append(" - ");
+        builder.append("IN PLAY: ").append(inPlay).append(" - ");
+        builder.append("MARKETS: ").append(Arrays.toString(marketTypes));
 
         ActivityLog.log(builder.toString());
     }
@@ -110,7 +110,7 @@ public class EventMonitor extends AbstractMonitor
             }
         }
 
-        return true;
+        return isRunning();
     }
 
     private void logEvent(Event event, String logFolderPath)

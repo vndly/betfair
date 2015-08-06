@@ -13,6 +13,13 @@ public class CsvLine
     private static final String SEPARATOR = ",";
     private static final PeriodFormatter periodFormatter = TimeUtils.getPeriodFormatter();
 
+    public CsvLine appendCurrentTimestamp()
+    {
+        append(TimeUtils.getTimestamp());
+
+        return this;
+    }
+
     public CsvLine appendTimestamp(long timestamp)
     {
         if (timestamp >= 0)

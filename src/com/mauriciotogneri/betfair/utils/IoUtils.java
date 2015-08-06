@@ -68,6 +68,13 @@ public class IoUtils
         return folderCreated && fileCreated;
     }
 
+    public static synchronized boolean isFileFilled(String filePath) throws IOException
+    {
+        File file = new File(filePath);
+
+        return file.exists() && (file.length() != 0);
+    }
+
     public static void closeResource(Closeable closeable)
     {
         if (closeable != null)
