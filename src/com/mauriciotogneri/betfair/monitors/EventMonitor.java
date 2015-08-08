@@ -86,7 +86,7 @@ public class EventMonitor extends AbstractMonitor
     {
         ListEvents.Response listEventsResponse = listEvents.execute();
 
-        ActivityLog.log("PROCESSING EVENTS: " + JsonUtils.toJson(listEventsResponse, false));
+        ActivityLog.log("PROCESSING EVENTS: " + listEventsResponse.size());
 
         for (EventResult eventResult : listEventsResponse)
         {

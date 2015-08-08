@@ -66,6 +66,6 @@ public class SessionMonitor extends AbstractMonitor
             }
         }
 
-        return loop;
+        return loop && isRunning();
     }
 }

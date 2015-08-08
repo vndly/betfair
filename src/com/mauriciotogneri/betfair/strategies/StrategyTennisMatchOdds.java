@@ -1,7 +1,6 @@
 package com.mauriciotogneri.betfair.strategies;
 
 import com.mauriciotogneri.betfair.Constants.Log;
-import com.mauriciotogneri.betfair.api.base.Enums.Side;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.api.base.Types.CancelExecutionReport;
@@ -45,6 +44,7 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private static final double MAX_PRICE_DIFF = 1.1;
     private static final double DEFAULT_STAKE = 2;
+
     private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
     private static final int ONE_HOUR_AND_HALF_OF_PLAY = 1000 * 60 * 90; // one hour and half (01:30:00)
 
@@ -120,7 +120,7 @@ public class StrategyTennisMatchOdds extends Strategy
                 {
                     Budget budget = new Budget(selection.back * DEFAULT_STAKE);
 
-                    if (Wallet.getInstance().requestBudget(budget))
+                    if (Wallet.getInstance().requestBudget(budget, eventId, marketId))
                     {
                         consecutiveValidBacks = 0;
 
@@ -196,11 +196,11 @@ public class StrategyTennisMatchOdds extends Strategy
 
         if (profit >= 0)
         {
-            Wallet.getInstance().addProfit(budget.getId(), profit + budget.getRequested());
+            Wallet.getInstance().addProfit(budget, eventId, marketId, profit + budget.getRequested());
         }
         else
         {
-            Wallet.getInstance().addProfit(budget.getId(), budget.getRest());
+            Wallet.getInstance().addProfit(budget, eventId, marketId, budget.getRest());
         }
     }
 
@@ -214,15 +214,13 @@ public class StrategyTennisMatchOdds extends Strategy
         }
     }
 
-    private void testBack(Session session) throws IOException
+    private void placeBackBet(BetInstruction betInstruction, Session session) throws IOException
     {
-        String marketId = "1.119607159x";
-        long selectionId = 1221386;
-        Side side = Side.BACK;
-        double price = 1.74;
-        double stake = 2;
-
-        BetInstruction betInstruction = new BetInstruction(marketId, selectionId, side, price, stake);
+        //        String marketId = "1.119607159x";
+        //        long selectionId = 1221386;
+        //        Side side = Side.BACK;
+        //        double price = 1.74;
+        //        double stake = 2;
 
         PlaceOrders placeOrders = PlaceOrders.getRequest(HttpClient.getDefault(), session, betInstruction);
         PlaceExecutionReport placeExecutionReport = placeOrders.execute();
@@ -231,15 +229,13 @@ public class StrategyTennisMatchOdds extends Strategy
         System.out.print(json);
     }
 
-    private void testLay(Session session) throws IOException
+    private void placeLayBet(BetInstruction betInstruction, Session session) throws IOException
     {
-        String marketId = "1.119607159";
-        long selectionId = 1221386;
-        Side side = Side.LAY;
-        double price = 1.73;
-        double stake = 2.01;
-
-        BetInstruction betInstruction = new BetInstruction(marketId, selectionId, side, price, stake);
+        //        String marketId = "1.119607159";
+        //        long selectionId = 1221386;
+        //        Side side = Side.LAY;
+        //        double price = 1.73;
+        //        double stake = 2.01;
 
         PlaceOrders placeOrders = PlaceOrders.getRequest(HttpClient.getDefault(), session, betInstruction);
         PlaceExecutionReport placeExecutionReport = placeOrders.execute();

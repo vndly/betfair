@@ -24,6 +24,11 @@ public class AppObjectProvider
         return instance.getProfitLog();
     }
 
+    public static CsvFile getWalletLog() throws IOException
+    {
+        return instance.getWalletLog();
+    }
+
     public static LogWriter getActivityLog() throws IOException
     {
         return instance.getActivityLog();

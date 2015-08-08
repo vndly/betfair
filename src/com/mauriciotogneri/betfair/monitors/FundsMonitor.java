@@ -34,6 +34,6 @@ public class FundsMonitor extends AbstractMonitor
 
         FundsLog.log(accountFundsResponse.availableToBetBalance);
 
-        return true;
+        return isRunning();
     }
 }

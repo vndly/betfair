@@ -8,22 +8,25 @@ import java.io.IOException;
 public class CustomObjectProvider implements ObjectProvider
 {
     private final String errorLogPath;
-    private final String profitLogPath;
     private final String activityLogPath;
+    private final String profitLogPath;
+    private final String walletLogPath;
     private final String fundsLogPath;
 
     // singleton instances
     private LogWriter errorLog;
     private LogWriter activityLog;
     private CsvFile profitLog;
+    private CsvFile walletLog;
     private CsvFile fundsLog;
 
-    public CustomObjectProvider(String errorLogPath, String profitLogPath, String activityLogPath, String fundsLogPath)
+    public CustomObjectProvider(String errorLogPath, String profitLogPath, String activityLogPath, String fundsLogPath, String walletLogPath)
     {
         this.errorLogPath = errorLogPath;
         this.profitLogPath = profitLogPath;
         this.activityLogPath = activityLogPath;
         this.fundsLogPath = fundsLogPath;
+        this.walletLogPath = walletLogPath;
     }
 
     @Override
@@ -36,6 +39,12 @@ public class CustomObjectProvider implements ObjectProvider
     public CsvFile getProfitLog() throws IOException
     {
         return (profitLog == null) ? (profitLog = new CsvFile(profitLogPath)) : profitLog;
+    }
+
+    @Override
+    public CsvFile getWalletLog() throws IOException
+    {
+        return (walletLog == null) ? (walletLog = new CsvFile(walletLogPath)) : walletLog;
     }
 
     @Override

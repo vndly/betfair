@@ -13,5 +13,7 @@ public interface ObjectProvider
 
     CsvFile getProfitLog() throws IOException;
 
+    CsvFile getWalletLog() throws IOException;
+
     CsvFile getFundsLog() throws IOException;
 }
