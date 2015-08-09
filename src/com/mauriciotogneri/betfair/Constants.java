@@ -19,6 +19,7 @@ public class Constants
     {
         public static final String BASE_LOG_PATH = "logs/";
         public static final String ERROR_LOG_PATH = BASE_LOG_PATH + "error.log";
+        public static final String THREAD_LOG_PATH = BASE_LOG_PATH + "thread.log";
         public static final String PROFIT_LOG_PATH = BASE_LOG_PATH + "profit.csv";
         public static final String WALLET_LOG_PATH = BASE_LOG_PATH + "wallet.csv";
         public static final String FUNDS_LOG_PATH = BASE_LOG_PATH + "funds.csv";
@@ -28,6 +29,7 @@ public class Constants
         public static final String INFO_LOG_FILE = "info.json";
         public static final String STATUS_LOG_FILE = "status.csv";
         public static final String PRICES_LOG_FILE = "prices.csv";
+        public static final String BETS_LOG_FILE = "bets.log";
         public static final String ACTIONS_LOG_FILE = "actions.csv";
     }
 

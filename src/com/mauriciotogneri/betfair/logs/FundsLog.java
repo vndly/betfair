@@ -1,16 +1,29 @@
 package com.mauriciotogneri.betfair.logs;
 
+import com.mauriciotogneri.betfair.api.accounts.GetAccountFunds.AccountFundsResponse;
 import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.dependency.AppObjectProvider;
+import com.mauriciotogneri.betfair.utils.JsonUtils;
 
 public class FundsLog
 {
     private static boolean firstLog = true;
     private static double lastFunds = 0;
 
-    public static synchronized void log(double funds)
+    public static synchronized void log(AccountFundsResponse accountFundsResponse)
     {
-        if (lastFunds != funds)
+        double funds = accountFundsResponse.availableToBetBalance;
+
+        if (funds == 0)
+        {
+            CsvLine csvLine = new CsvLine();
+            csvLine.appendCurrentTimestamp();
+            csvLine.append(funds);
+            csvLine.append(JsonUtils.toJson(accountFundsResponse));
+
+            write(csvLine);
+        }
+        else if (lastFunds != funds)
         {
             lastFunds = funds;
 
@@ -23,6 +36,7 @@ public class FundsLog
             CsvLine csvLine = new CsvLine();
             csvLine.appendCurrentTimestamp();
             csvLine.append(funds);
+            csvLine.append("");
 
             write(csvLine);
         }

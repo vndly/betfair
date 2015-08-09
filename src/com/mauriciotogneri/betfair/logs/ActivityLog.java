@@ -9,7 +9,7 @@ public class ActivityLog
     {
         try
         {
-            AppObjectProvider.getActivityLog().write(TimeUtils.getTimestamp() + "\t" + message + "\n");
+            AppObjectProvider.getActivityLog().writeLn(TimeUtils.getTimestamp() + "\t" + message);
         }
         catch (Exception e)
         {

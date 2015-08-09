@@ -12,7 +12,7 @@ public class ErrorLog
     {
         try
         {
-            AppObjectProvider.getErrorLog().write(TimeUtils.getTimestamp() + "\t" + message + "\n");
+            AppObjectProvider.getErrorLog().writeLn(TimeUtils.getTimestamp() + "\t" + message);
         }
         catch (Exception e)
         {

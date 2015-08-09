@@ -13,8 +13,10 @@ public abstract class AbstractMonitor extends Thread
     protected final HttpClient httpClient;
     protected final Session session;
 
-    public AbstractMonitor(HttpClient httpClient, Session session)
+    public AbstractMonitor(HttpClient httpClient, Session session, String name)
     {
+        super(name);
+
         this.httpClient = httpClient;
         this.session = session;
     }

@@ -1,5 +1,6 @@
 package com.mauriciotogneri.betfair.dependency;
 
+import com.mauriciotogneri.betfair.Constants.Log;
 import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.logs.LogWriter;
 
@@ -7,55 +8,46 @@ import java.io.IOException;
 
 public class CustomObjectProvider implements ObjectProvider
 {
-    private final String errorLogPath;
-    private final String activityLogPath;
-    private final String profitLogPath;
-    private final String walletLogPath;
-    private final String fundsLogPath;
-
-    // singleton instances
     private LogWriter errorLog;
+    private LogWriter threadLog;
     private LogWriter activityLog;
     private CsvFile profitLog;
     private CsvFile walletLog;
     private CsvFile fundsLog;
 
-    public CustomObjectProvider(String errorLogPath, String profitLogPath, String activityLogPath, String fundsLogPath, String walletLogPath)
-    {
-        this.errorLogPath = errorLogPath;
-        this.profitLogPath = profitLogPath;
-        this.activityLogPath = activityLogPath;
-        this.fundsLogPath = fundsLogPath;
-        this.walletLogPath = walletLogPath;
-    }
-
     @Override
     public LogWriter getErrorLog() throws IOException
     {
-        return (errorLog == null) ? (errorLog = new LogWriter(errorLogPath)) : errorLog;
+        return (errorLog == null) ? (errorLog = new LogWriter(Log.ERROR_LOG_PATH)) : errorLog;
+    }
+
+    @Override
+    public LogWriter getThreadLog() throws IOException
+    {
+        return (threadLog == null) ? (threadLog = new LogWriter(Log.THREAD_LOG_PATH)) : threadLog;
     }
 
     @Override
     public CsvFile getProfitLog() throws IOException
     {
-        return (profitLog == null) ? (profitLog = new CsvFile(profitLogPath)) : profitLog;
+        return (profitLog == null) ? (profitLog = new CsvFile(Log.PROFIT_LOG_PATH)) : profitLog;
     }
 
     @Override
     public CsvFile getWalletLog() throws IOException
     {
-        return (walletLog == null) ? (walletLog = new CsvFile(walletLogPath)) : walletLog;
+        return (walletLog == null) ? (walletLog = new CsvFile(Log.WALLET_LOG_PATH)) : walletLog;
     }
 
     @Override
     public LogWriter getActivityLog() throws IOException
     {
-        return (activityLog == null) ? (activityLog = new LogWriter(activityLogPath)) : activityLog;
+        return (activityLog == null) ? (activityLog = new LogWriter(Log.ACTIVITY_LOG_PATH)) : activityLog;
     }
 
     @Override
     public CsvFile getFundsLog() throws IOException
     {
-        return (fundsLog == null) ? (fundsLog = new CsvFile(fundsLogPath)) : fundsLog;
+        return (fundsLog == null) ? (fundsLog = new CsvFile(Log.FUNDS_LOG_PATH)) : fundsLog;
     }
 }

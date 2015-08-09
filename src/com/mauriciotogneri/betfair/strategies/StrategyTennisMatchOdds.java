@@ -9,6 +9,7 @@ import com.mauriciotogneri.betfair.api.betting.CancelOrders;
 import com.mauriciotogneri.betfair.api.betting.PlaceOrders;
 import com.mauriciotogneri.betfair.csv.CsvFile;
 import com.mauriciotogneri.betfair.csv.CsvLine;
+import com.mauriciotogneri.betfair.logs.LogWriter;
 import com.mauriciotogneri.betfair.logs.ProfitLog;
 import com.mauriciotogneri.betfair.models.Bet;
 import com.mauriciotogneri.betfair.models.BetInstruction;
@@ -27,8 +28,10 @@ public class StrategyTennisMatchOdds extends Strategy
     private final String eventId;
     private final String marketId;
     private final Session session;
+    private final HttpClient httpClient;
 
     private final CsvFile logPrice;
+    private final LogWriter logBets;
     private final CsvFile logActionsPlayerA;
     private final CsvFile logActionsPlayerB;
 
@@ -59,8 +62,10 @@ public class StrategyTennisMatchOdds extends Strategy
         this.session = session;
         this.eventId = eventId;
         this.marketId = marketId;
+        this.httpClient = HttpClient.getDefault();
 
         this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logBets = new LogWriter(logFolderPath + Log.BETS_LOG_FILE);
         this.logActionsPlayerA = new CsvFile(logFolderPath + "actionsA.csv");
         this.logActionsPlayerB = new CsvFile(logFolderPath + "actionsB.csv");
 
@@ -212,24 +217,16 @@ public class StrategyTennisMatchOdds extends Strategy
             logProfit(timestamp, betSimulationPlayerA);
             logProfit(timestamp, betSimulationPlayerB);
         }
+        else
+        {
+            CsvLine csvLine = new CsvLine();
+            csvLine.append("STRATEGY NOT EXECUTED");
+
+            logPrice.write(csvLine);
+        }
     }
 
-    private void placeBackBet(BetInstruction betInstruction, Session session) throws IOException
-    {
-        //        String marketId = "1.119607159x";
-        //        long selectionId = 1221386;
-        //        Side side = Side.BACK;
-        //        double price = 1.74;
-        //        double stake = 2;
-
-        PlaceOrders placeOrders = PlaceOrders.getRequest(HttpClient.getDefault(), session, betInstruction);
-        PlaceExecutionReport placeExecutionReport = placeOrders.execute();
-
-        String json = JsonUtils.toJson(placeExecutionReport);
-        System.out.print(json);
-    }
-
-    private void placeLayBet(BetInstruction betInstruction, Session session) throws IOException
+    private Bet placeBet(BetInstruction betInstruction) throws IOException
     {
         //        String marketId = "1.119607159";
         //        long selectionId = 1221386;
@@ -237,38 +234,53 @@ public class StrategyTennisMatchOdds extends Strategy
         //        double price = 1.73;
         //        double stake = 2.01;
 
-        PlaceOrders placeOrders = PlaceOrders.getRequest(HttpClient.getDefault(), session, betInstruction);
+        //        String marketId = "1.119607159x";
+        //        long selectionId = 1221386;
+        //        Side side = Side.BACK;
+        //        double price = 1.74;
+        //        double stake = 2;
+
+        PlaceOrders placeOrders = PlaceOrders.getRequest(httpClient, session, betInstruction);
         PlaceExecutionReport placeExecutionReport = placeOrders.execute();
 
-        System.out.print(JsonUtils.toJson(placeExecutionReport));
+        logBets.writeLn(JsonUtils.toJson(placeExecutionReport));
 
         if (placeExecutionReport.isValid())
         {
-            System.out.print("PLACED");
+            logBets.writeLn("PLACED");
 
             Bet bet = placeExecutionReport.getBet(betInstruction);
-            System.out.print(JsonUtils.toJson(bet));
+            logBets.writeLn(JsonUtils.toJson(bet));
 
-            CancelOrders cancelOrders = CancelOrders.getRequest(HttpClient.getDefault(), session, bet);
-            CancelExecutionReport cancelExecutionReport = cancelOrders.execute();
-
-            System.out.print(JsonUtils.toJson(cancelExecutionReport));
-
-            if (cancelExecutionReport.isValid())
+            if (!bet.isMatched)
             {
-                System.out.print("CANCELLED");
+                CancelOrders cancelOrders = CancelOrders.getRequest(httpClient, session, bet);
+                CancelExecutionReport cancelExecutionReport = cancelOrders.execute();
+
+                logBets.writeLn(JsonUtils.toJson(cancelExecutionReport));
+
+                if (cancelExecutionReport.isValid())
+                {
+                    logBets.writeLn("CANCELLED");
+                }
+                else
+                {
+                    logBets.writeLn("NOT CANCELLED");
+
+                    return bet;
+                }
             }
             else
             {
-                System.out.print("NOT CANCELLED");
+                return bet;
             }
         }
         else
         {
-            System.out.print("NOT PLACED");
+            logBets.writeLn("NOT PLACED");
         }
 
-        System.out.print("FINISHED");
+        return null;
     }
 
     private static class BetSimulation

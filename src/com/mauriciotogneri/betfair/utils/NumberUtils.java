@@ -5,7 +5,7 @@ import java.text.DecimalFormat;
 public class NumberUtils
 {
     private static final int DEFAULT_DECIMAL_PLACES = 3;
-    private static final DecimalFormat decimalFormat = new DecimalFormat("#.00");
+    private static final DecimalFormat decimalFormat = new DecimalFormat("#0.00");
 
     public static double round(double value, int decimals)
     {

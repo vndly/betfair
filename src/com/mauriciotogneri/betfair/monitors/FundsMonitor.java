@@ -15,7 +15,7 @@ public class FundsMonitor extends AbstractMonitor
 
     public FundsMonitor(HttpClient httpClient, Session session)
     {
-        super(httpClient, session);
+        super(httpClient, session, "FUNDS MONITOR");
 
         this.session = session;
         this.getAccountFunds = new GetAccountFunds(HttpClient.getDefault());
@@ -32,7 +32,7 @@ public class FundsMonitor extends AbstractMonitor
     {
         AccountFundsResponse accountFundsResponse = getAccountFunds.execute(session.appKey, session.getSessionToken());
 
-        FundsLog.log(accountFundsResponse.availableToBetBalance);
+        FundsLog.log(accountFundsResponse);
 
         return isRunning();
     }

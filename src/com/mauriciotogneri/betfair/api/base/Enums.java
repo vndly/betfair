@@ -41,6 +41,11 @@ public class Enums
             return null;
         }
 
+        public String getName()
+        {
+            return super.toString();
+        }
+
         public String toString()
         {
             return id;

@@ -36,6 +36,11 @@ public class LogWriter
         bufferedWriter.flush();
     }
 
+    public synchronized void writeLn(String content) throws IOException
+    {
+        write(content + "\n");
+    }
+
     public synchronized void close()
     {
         IoUtils.closeResource(bufferedWriter);

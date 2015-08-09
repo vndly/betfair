@@ -9,6 +9,8 @@ public interface ObjectProvider
 {
     LogWriter getErrorLog() throws IOException;
 
+    LogWriter getThreadLog() throws IOException;
+
     LogWriter getActivityLog() throws IOException;
 
     CsvFile getProfitLog() throws IOException;

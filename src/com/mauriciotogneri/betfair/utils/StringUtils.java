@@ -11,4 +11,9 @@ public class StringUtils
     {
         return !equals(a, b);
     }
+
+    public static boolean contains(String a, String b)
+    {
+        return (a != null) && a.contains(b);
+    }
 }

@@ -1,6 +1,5 @@
 package com.mauriciotogneri.betfair;
 
-import com.mauriciotogneri.betfair.Constants.Log;
 import com.mauriciotogneri.betfair.api.accounts.Login;
 import com.mauriciotogneri.betfair.api.accounts.Login.LoginResponse;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
@@ -13,6 +12,7 @@ import com.mauriciotogneri.betfair.models.Config.ConfigMonitor;
 import com.mauriciotogneri.betfair.monitors.EventMonitor;
 import com.mauriciotogneri.betfair.monitors.FundsMonitor;
 import com.mauriciotogneri.betfair.monitors.SessionMonitor;
+import com.mauriciotogneri.betfair.monitors.ThreadMonitor;
 import com.mauriciotogneri.betfair.utils.IoUtils;
 import com.mauriciotogneri.betfair.utils.JsonUtils;
 
@@ -29,7 +29,7 @@ public class Main
 
     private void init(String configFilePath) throws IOException
     {
-        CustomObjectProvider customObjectProvider = new CustomObjectProvider(Log.ERROR_LOG_PATH, Log.PROFIT_LOG_PATH, Log.ACTIVITY_LOG_PATH, Log.FUNDS_LOG_PATH, Log.WALLET_LOG_PATH);
+        CustomObjectProvider customObjectProvider = new CustomObjectProvider();
         AppObjectProvider.init(customObjectProvider);
 
         Config config = JsonUtils.fromJson(IoUtils.readFile(configFilePath), Config.class);
@@ -51,6 +51,9 @@ public class Main
 
             FundsMonitor fundsMonitor = new FundsMonitor(HttpClient.getDefault(), session);
             fundsMonitor.start();
+
+            ThreadMonitor threadMonitor = new ThreadMonitor();
+            threadMonitor.start();
 
             for (ConfigMonitor monitor : monitors)
             {

@@ -13,6 +13,7 @@ import com.mauriciotogneri.betfair.logs.ActivityLog;
 import com.mauriciotogneri.betfair.logs.ErrorLog;
 import com.mauriciotogneri.betfair.utils.IoUtils;
 import com.mauriciotogneri.betfair.utils.JsonUtils;
+import com.mauriciotogneri.betfair.utils.TimeUtils;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -29,9 +30,12 @@ public class EventMonitor extends AbstractMonitor
 
     private static final int WAITING_TIME = 60 * 1000; // one minute (in milliseconds)
 
+    private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
+    private static final int THREE_HOURS_AFTER_START = 1000 * 60 * 60 * 3; // plus 3 hours (+03:00:00)
+
     public EventMonitor(HttpClient httpClient, Session session, String eventType, boolean inPlay, String[] marketTypes)
     {
-        super(httpClient, session);
+        super(httpClient, session, "EVENT MONITOR: " + eventType + ", " + inPlay + ", " + Arrays.toString(marketTypes));
 
         this.eventType = eventType;
         this.inPlay = inPlay;
@@ -55,9 +59,11 @@ public class EventMonitor extends AbstractMonitor
     @Override
     protected void onPostExecute(boolean executed) throws Exception
     {
+        EventTypeEnum typeOfEvent = EventTypeEnum.get(eventType);
+
         StringBuilder builder = new StringBuilder();
         builder.append("FINISHED EVENT MONITOR FOR ");
-        builder.append("TYPE: ").append(EventTypeEnum.get(eventType)).append(" - ");
+        builder.append("TYPE: ").append((typeOfEvent != null) ? typeOfEvent.getName() : "").append(" - ");
         builder.append("IN PLAY: ").append(inPlay).append(" - ");
         builder.append("MARKETS: ").append(Arrays.toString(marketTypes));
 
@@ -92,7 +98,9 @@ public class EventMonitor extends AbstractMonitor
         {
             Event event = eventResult.event;
 
-            if (addEvent(event.id))
+            long eventElapsedTime = System.currentTimeMillis() - TimeUtils.dateToMilliseconds(event.openDate, "UTC");
+
+            if ((eventElapsedTime > ONE_HOUR_BEFORE_START) && (eventElapsedTime < 0) && (addEvent(event.id)))
             {
                 String logFolderPath = Log.EVENT_LOG_PATH + eventType + "/" + event.id + "/";
 

@@ -133,29 +133,29 @@ public class StrategySoccerOverUnder15 extends Strategy
 
             if (makeBackBet(tick, selection))
             {
-                BetInstruction betInstruction = new BetInstruction(marketId, selection.id, Side.BACK, selection.back, DEFAULT_STAKE);
-
-                PlaceExecutionReport placeExecutionReport = executeBet(betInstruction);
-
-                if (placeExecutionReport.isValid())
-                {
-                    Bet bet = placeExecutionReport.getBet(betInstruction);
-
-                    if (bet.isMatched)
-                    {
-                        initialBet = bet;
-
-                        logBet(tick.timestamp, initialBet);
-
-                        state = State.BACKED;
-                    }
-                    else
-                    {
-                        cancelBet(bet);
-
-                        // TODO: check if the bet was cancelled
-                    }
-                }
+//                BetInstruction betInstruction = new BetInstruction(marketId, selection.id, Side.BACK, selection.back, DEFAULT_STAKE);
+                //
+                //                PlaceExecutionReport placeExecutionReport = executeBet(betInstruction);
+                //
+                //                if (placeExecutionReport.isValid())
+                //                {
+                //                    Bet bet = placeExecutionReport.getBet(betInstruction);
+                //
+                //                    if (bet.isMatched)
+                //                    {
+                //                        initialBet = bet;
+                //
+                //                        logBet(tick.timestamp, initialBet);
+                //
+                //                        state = State.BACKED;
+                //                    }
+                //                    else
+                //                    {
+                //                        cancelBet(bet);
+                //
+                //                        // TODO: check if the bet was cancelled
+                //                    }
+                //                }
             }
         }
     }

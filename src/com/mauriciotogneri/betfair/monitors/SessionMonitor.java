@@ -19,7 +19,7 @@ public class SessionMonitor extends AbstractMonitor
 
     public SessionMonitor(HttpClient httpClient, Session session, String username, String password)
     {
-        super(httpClient, session);
+        super(httpClient, session, "SESSION MONITOR");
 
         this.session = session;
         this.username = username;

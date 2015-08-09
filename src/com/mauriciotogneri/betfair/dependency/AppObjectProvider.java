@@ -19,6 +19,11 @@ public class AppObjectProvider
         return instance.getErrorLog();
     }
 
+    public static LogWriter getThreaddLog() throws IOException
+    {
+        return instance.getThreadLog();
+    }
+
     public static CsvFile getProfitLog() throws IOException
     {
         return instance.getProfitLog();
