@@ -32,7 +32,7 @@ public class ThreadMonitor extends Thread
 
             boolean continueRunning = true;
 
-            while (continueRunning && isRunning())
+            while (continueRunning || isRunning())
             {
                 startTime = System.currentTimeMillis();
 

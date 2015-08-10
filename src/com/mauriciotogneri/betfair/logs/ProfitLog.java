@@ -26,6 +26,7 @@ public class ProfitLog
         csvLine.append("PROFIT");
         csvLine.append("EVENT ID");
         csvLine.append("MARKET ID");
+        csvLine.append("PLAYER");
         csvLine.append("BACK TIME");
         csvLine.append("BACK PRICE");
         csvLine.append("BACK STEAK");

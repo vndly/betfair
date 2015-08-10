@@ -31,6 +31,7 @@ public class StrategyTennisMatchOdds extends Strategy
     private final HttpClient httpClient;
 
     private final CsvFile logPrice;
+    private final LogWriter logActivity;
     private final LogWriter logBets;
     private final CsvFile logActionsPlayerA;
     private final CsvFile logActionsPlayerB;
@@ -65,6 +66,7 @@ public class StrategyTennisMatchOdds extends Strategy
         this.httpClient = HttpClient.getDefault();
 
         this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logActivity = new LogWriter(logFolderPath + Log.ACTIVITY_LOG_FILE);
         this.logBets = new LogWriter(logFolderPath + Log.BETS_LOG_FILE);
         this.logActionsPlayerA = new CsvFile(logFolderPath + "actionsA.csv");
         this.logActionsPlayerB = new CsvFile(logFolderPath + "actionsB.csv");
@@ -115,7 +117,7 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private void processSelection(Player player, Selection selection, BetSimulation betSimulation, long timestamp) throws IOException
     {
-        if (betSimulation.priceBack == 0)
+        if (!betSimulation.isBacked())
         {
             if (validBack(selection.back, selection.lay, timestamp))
             {
@@ -125,13 +127,20 @@ public class StrategyTennisMatchOdds extends Strategy
                 {
                     Budget budget = new Budget(selection.back * DEFAULT_STAKE);
 
-                    if (Wallet.getInstance().requestBudget(budget, eventId, marketId))
+                    if (Wallet.getInstance().withdraw(budget, eventId, marketId))
                     {
                         consecutiveValidBacks = 0;
 
-                        betSimulation.placeBackBet(selection.back, timestamp, budget);
+                        boolean betPlaced = betSimulation.placeBackBet(selection.back, timestamp, budget);
 
-                        logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                        if (betPlaced)
+                        {
+                            logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                        }
+                        else
+                        {
+                            Wallet.getInstance().deposit(budget, eventId, marketId, budget.getRequested());
+                        }
                     }
                 }
             }
@@ -142,9 +151,19 @@ public class StrategyTennisMatchOdds extends Strategy
         }
         else if (validLay(betSimulation.priceBack, selection.lay))
         {
-            betSimulation.placeLayBet(selection.lay, timestamp);
+            if (!betSimulation.isLaid())
+            {
+                boolean betPlaced = betSimulation.placeLayBet(selection.lay, timestamp);
 
-            logAction(player, timestamp, "LAID AT:   " + selection.lay);
+                if (betPlaced)
+                {
+                    logAction(player, timestamp, "LAID AT:   " + selection.lay);
+                }
+            }
+            else
+            {
+                logAction(player, timestamp, "LOW PRICE: " + selection.lay);
+            }
         }
     }
 
@@ -176,8 +195,10 @@ public class StrategyTennisMatchOdds extends Strategy
         }
     }
 
-    private void logProfit(long timestamp, BetSimulation betSimulation) throws IOException
+    private void logProfit(long timestamp, Player player, BetSimulation betSimulation) throws IOException
     {
+        logActivity.writeLn("LOG PROFIT: " + player + " - " + JsonUtils.toJson(betSimulation));
+
         double profit = betSimulation.getProfit();
 
         CsvLine csvLine = new CsvLine();
@@ -186,6 +207,7 @@ public class StrategyTennisMatchOdds extends Strategy
         csvLine.append(profit);
         csvLine.append(eventId);
         csvLine.append(marketId);
+        csvLine.append(player.toString());
 
         csvLine.appendTimestamp(betSimulation.timestampBack);
         csvLine.append(betSimulation.priceBack);
@@ -201,11 +223,15 @@ public class StrategyTennisMatchOdds extends Strategy
 
         if (profit >= 0)
         {
-            Wallet.getInstance().addProfit(budget, eventId, marketId, profit + budget.getRequested());
+            logActivity.writeLn("LOG DEPOSIT: " + profit + budget.getRequested());
+
+            Wallet.getInstance().deposit(budget, eventId, marketId, profit + budget.getRequested());
         }
         else
         {
-            Wallet.getInstance().addProfit(budget, eventId, marketId, budget.getRest());
+            logActivity.writeLn("LOG DEPOSIT: " + budget.getRest());
+
+            Wallet.getInstance().deposit(budget, eventId, marketId, budget.getRest());
         }
     }
 
@@ -214,15 +240,14 @@ public class StrategyTennisMatchOdds extends Strategy
     {
         if (executed)
         {
-            logProfit(timestamp, betSimulationPlayerA);
-            logProfit(timestamp, betSimulationPlayerB);
+            logActivity.writeLn("LOGGING PROFITS");
+
+            logProfit(timestamp, Player.PLAYER_A, betSimulationPlayerA);
+            logProfit(timestamp, Player.PLAYER_B, betSimulationPlayerB);
         }
         else
         {
-            CsvLine csvLine = new CsvLine();
-            csvLine.append("STRATEGY NOT EXECUTED");
-
-            logPrice.write(csvLine);
+            logActivity.writeLn("STRATEGY NOT EXECUTED");
         }
     }
 
@@ -295,7 +320,7 @@ public class StrategyTennisMatchOdds extends Strategy
         public double stakeLay = 0;
         public long timestampLay = 0;
 
-        public void placeBackBet(double price, long timestamp, Budget requestedBudget)
+        public boolean placeBackBet(double price, long timestamp, Budget requestedBudget)
         {
             budget = requestedBudget;
 
@@ -305,9 +330,11 @@ public class StrategyTennisMatchOdds extends Strategy
 
             // TODO: if bet is placed
             budget.use(stakeBack);
+
+            return true;
         }
 
-        public void placeLayBet(double price, long timestamp)
+        public boolean placeLayBet(double price, long timestamp)
         {
             priceLay = price;
             stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
@@ -316,6 +343,18 @@ public class StrategyTennisMatchOdds extends Strategy
             // TODO: if bet is placed
             double liability = (priceLay * stakeLay) * stakeLay;
             budget.use(liability);
+
+            return true;
+        }
+
+        public boolean isBacked()
+        {
+            return priceBack != 0;
+        }
+
+        public boolean isLaid()
+        {
+            return priceLay != 0;
         }
 
         public double getProfit()

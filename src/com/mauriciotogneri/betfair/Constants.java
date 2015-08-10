@@ -30,6 +30,7 @@ public class Constants
         public static final String STATUS_LOG_FILE = "status.csv";
         public static final String PRICES_LOG_FILE = "prices.csv";
         public static final String BETS_LOG_FILE = "bets.log";
+        public static final String ACTIVITY_LOG_FILE = "activity.log";
         public static final String ACTIONS_LOG_FILE = "actions.csv";
     }
 

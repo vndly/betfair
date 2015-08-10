@@ -36,7 +36,7 @@ public class Wallet
         return instance;
     }
 
-    public synchronized boolean requestBudget(Budget budget, String eventId, String marketId) throws IOException
+    public synchronized boolean withdraw(Budget budget, String eventId, String marketId) throws IOException
     {
         if (balance >= budget.getRequested())
         {
@@ -54,7 +54,7 @@ public class Wallet
         return false;
     }
 
-    public synchronized void addProfit(Budget budget, String eventId, String marketId, double profit) throws IOException
+    public synchronized void deposit(Budget budget, String eventId, String marketId, double profit) throws IOException
     {
         balance += profit;
 
