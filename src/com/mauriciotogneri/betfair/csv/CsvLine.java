@@ -2,16 +2,12 @@ package com.mauriciotogneri.betfair.csv;
 
 import com.mauriciotogneri.betfair.utils.TimeUtils;
 
-import org.joda.time.Period;
-import org.joda.time.format.PeriodFormatter;
-
 public class CsvLine
 {
     private final StringBuilder builder = new StringBuilder();
     private boolean firstElement = true;
 
     private static final String SEPARATOR = ",";
-    private static final PeriodFormatter periodFormatter = TimeUtils.getPeriodFormatter();
 
     public CsvLine appendCurrentTimestamp()
     {
@@ -24,15 +20,11 @@ public class CsvLine
     {
         if (timestamp >= 0)
         {
-            Period period = new Period(timestamp);
-
-            return append(periodFormatter.print(period));
+            return append(TimeUtils.getPeriod(timestamp));
         }
         else
         {
-            Period period = new Period(Math.abs(timestamp));
-
-            return append("-" + periodFormatter.print(period));
+            return append("-" + TimeUtils.getPeriod(timestamp));
         }
     }
 

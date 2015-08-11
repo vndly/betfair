@@ -127,7 +127,7 @@ public class StrategyTennisMatchOdds extends Strategy
                 {
                     Budget budget = new Budget(selection.back * DEFAULT_STAKE);
 
-                    if (Wallet.getInstance().withdraw(budget, eventId, marketId))
+                    if (Wallet.getInstance().withdraw(budget, eventId, marketId, player.toString()))
                     {
                         consecutiveValidBacks = 0;
 
@@ -139,7 +139,7 @@ public class StrategyTennisMatchOdds extends Strategy
                         }
                         else
                         {
-                            Wallet.getInstance().deposit(budget, eventId, marketId, budget.getRequested());
+                            Wallet.getInstance().deposit(budget, eventId, marketId, player.toString(), budget.getRequested());
                         }
                     }
                 }
@@ -164,6 +164,8 @@ public class StrategyTennisMatchOdds extends Strategy
             {
                 logAction(player, timestamp, "LOW PRICE: " + selection.lay);
             }
+
+            betSimulation.saveLowPrice(selection.lay);
         }
     }
 
@@ -216,22 +218,31 @@ public class StrategyTennisMatchOdds extends Strategy
         csvLine.appendTimestamp(betSimulation.timestampLay);
         csvLine.append(betSimulation.priceLay);
         csvLine.append(betSimulation.stakeLay);
+        csvLine.append(betSimulation.getLowPriceAverage());
+        csvLine.append(betSimulation.getLowPriceCount());
 
         ProfitLog.log(csvLine);
 
         Budget budget = betSimulation.getBudget();
 
-        if (profit >= 0)
+        if (budget != null)
         {
-            logActivity.writeLn("LOG DEPOSIT: " + profit + budget.getRequested());
+            if (profit >= 0)
+            {
+                logActivity.writeLn("LOG DEPOSIT: " + player + " => " + profit + budget.getRequested());
 
-            Wallet.getInstance().deposit(budget, eventId, marketId, profit + budget.getRequested());
+                Wallet.getInstance().deposit(budget, eventId, marketId, player.toString(), profit + budget.getRequested());
+            }
+            else
+            {
+                logActivity.writeLn("LOG DEPOSIT: " + player + " => " + budget.getRest());
+
+                Wallet.getInstance().deposit(budget, eventId, marketId, player.toString(), budget.getRest());
+            }
         }
         else
         {
-            logActivity.writeLn("LOG DEPOSIT: " + budget.getRest());
-
-            Wallet.getInstance().deposit(budget, eventId, marketId, budget.getRest());
+            logActivity.writeLn("LOG NO BUDGET ACQUIRED: " + player);
         }
     }
 
@@ -320,6 +331,9 @@ public class StrategyTennisMatchOdds extends Strategy
         public double stakeLay = 0;
         public long timestampLay = 0;
 
+        private double lowPriceSum = 0;
+        private int lowPriceCount = 0;
+
         public boolean placeBackBet(double price, long timestamp, Budget requestedBudget)
         {
             budget = requestedBudget;
@@ -345,6 +359,22 @@ public class StrategyTennisMatchOdds extends Strategy
             budget.use(liability);
 
             return true;
+        }
+
+        public void saveLowPrice(double value)
+        {
+            lowPriceSum += value;
+            lowPriceCount++;
+        }
+
+        public double getLowPriceAverage()
+        {
+            return (lowPriceCount > 0) ? NumberUtils.round(lowPriceSum / lowPriceCount, 2) : 0;
+        }
+
+        public int getLowPriceCount()
+        {
+            return lowPriceCount;
         }
 
         public boolean isBacked()

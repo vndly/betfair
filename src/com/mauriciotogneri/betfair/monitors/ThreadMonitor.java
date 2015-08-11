@@ -65,6 +65,10 @@ public class ThreadMonitor extends Thread
         {
             ErrorLog.log(e);
         }
+        finally
+        {
+            // TODO: SEND EMAIL TO NOTIFY THE BOT HAS FINISHED
+        }
     }
 
     private List<Thread> getThreads()

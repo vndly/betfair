@@ -26,6 +26,7 @@ public class WalletLog
         csvLine.append("BUDGET ID");
         csvLine.append("EVENT ID");
         csvLine.append("MARKET ID");
+        csvLine.append("PLAYER");
         csvLine.append("VALUE");
         csvLine.append("BALANCE");
 
@@ -40,7 +41,7 @@ public class WalletLog
         }
         catch (Exception e)
         {
-            // ignore
+            ErrorLog.log(e);
         }
     }
 }

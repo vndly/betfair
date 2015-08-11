@@ -47,7 +47,7 @@ public class ErrorLog
         }
         else if (e instanceof JsonSyntaxException)
         {
-            if (StringUtils.contains(e.getMessage(), "Expected BEGIN_ARRAY but was BEGIN_OBJECT") && StringUtils.contains(stackTrace, "MarketMonitor"))
+            if (StringUtils.contains(e.getMessage(), "Expected BEGIN_ARRAY but was BEGIN_OBJECT") && (StringUtils.contains(stackTrace, "MarketMonitor") || StringUtils.contains(stackTrace, "EventMonitor")))
             {
                 return false;
             }

@@ -1,6 +1,7 @@
 package com.mauriciotogneri.betfair.logs;
 
 import com.mauriciotogneri.betfair.dependency.AppObjectProvider;
+import com.mauriciotogneri.betfair.monitors.AbstractMonitor;
 import com.mauriciotogneri.betfair.utils.TimeUtils;
 
 import java.util.List;
@@ -15,7 +16,7 @@ public class ThreadLog
         }
         catch (Exception e)
         {
-            // ignore
+            ErrorLog.log(e);
         }
     }
 
@@ -32,6 +33,12 @@ public class ThreadLog
             builder.append(thread.getName());
             builder.append(" - ");
             builder.append(thread.getId());
+
+            if (thread instanceof AbstractMonitor)
+            {
+                builder.append(" - ");
+                builder.append(((AbstractMonitor) thread).elapsedTime());
+            }
         }
 
         builder.append("\n");

@@ -1,5 +1,6 @@
 package com.mauriciotogneri.betfair.utils;
 
+import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
 
@@ -13,6 +14,7 @@ public class TimeUtils
 {
     private static final DateFormat logTimestamp = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss.SSS");
     private static final DateFormat fullTimestamp = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final PeriodFormatter periodFormatter = TimeUtils.getPeriodFormatter();
 
     public static synchronized String getTimestamp()
     {
@@ -28,7 +30,14 @@ public class TimeUtils
         return fullTimestamp.parse(timestamp).getTime();
     }
 
-    public static PeriodFormatter getPeriodFormatter()
+    public static synchronized String getPeriod(long timestamp)
+    {
+        Period period = new Period(timestamp);
+
+        return periodFormatter.print(period);
+    }
+
+    private static PeriodFormatter getPeriodFormatter()
     {
         PeriodFormatterBuilder periodFormatterBuilder = new PeriodFormatterBuilder();
         periodFormatterBuilder.printZeroAlways();

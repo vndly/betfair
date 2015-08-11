@@ -48,7 +48,7 @@ public class MarketMonitor extends AbstractMonitor
 
     public MarketMonitor(HttpClient httpClient, Session session, String logFolderPath, Event event, String eventType, MarketCatalogue marketCatalogue)
     {
-        super(httpClient, session, "MARKET MONITOR: " + event.id + ", " + marketCatalogue.marketId);
+        super(httpClient, session, "MARKET MONITOR: " + event.id + " - " + marketCatalogue.marketId);
 
         this.event = event;
         this.eventType = eventType;

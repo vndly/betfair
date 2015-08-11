@@ -13,7 +13,7 @@ public class ActivityLog
         }
         catch (Exception e)
         {
-            // ignore
+            ErrorLog.log(e);
         }
     }
 }

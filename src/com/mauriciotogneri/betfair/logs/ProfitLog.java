@@ -33,6 +33,8 @@ public class ProfitLog
         csvLine.append("LAY TIME");
         csvLine.append("LAY PRICE");
         csvLine.append("LAY STEAK");
+        csvLine.append("LAY PRICE AVG.");
+        csvLine.append("LAY PRICE COUNT");
 
         write(csvLine);
     }
@@ -45,7 +47,7 @@ public class ProfitLog
         }
         catch (Exception e)
         {
-            // ignore
+            ErrorLog.log(e);
         }
     }
 }

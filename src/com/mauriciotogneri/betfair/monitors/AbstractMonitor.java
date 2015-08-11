@@ -5,6 +5,7 @@ import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.logs.ErrorLog;
 import com.mauriciotogneri.betfair.utils.IoUtils;
+import com.mauriciotogneri.betfair.utils.TimeUtils;
 
 import java.io.IOException;
 
@@ -12,6 +13,7 @@ public abstract class AbstractMonitor extends Thread
 {
     protected final HttpClient httpClient;
     protected final Session session;
+    private final long startDate;
 
     public AbstractMonitor(HttpClient httpClient, Session session, String name)
     {
@@ -19,6 +21,12 @@ public abstract class AbstractMonitor extends Thread
 
         this.httpClient = httpClient;
         this.session = session;
+        this.startDate = System.currentTimeMillis();
+    }
+
+    public String elapsedTime()
+    {
+        return TimeUtils.getPeriod(System.currentTimeMillis() - startDate);
     }
 
     protected int getWaitTime()
@@ -90,7 +98,7 @@ public abstract class AbstractMonitor extends Thread
             }
             catch (Exception e)
             {
-                // ignore
+                ErrorLog.log(e);
             }
         }
     }

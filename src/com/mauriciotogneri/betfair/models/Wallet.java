@@ -36,32 +36,32 @@ public class Wallet
         return instance;
     }
 
-    public synchronized boolean withdraw(Budget budget, String eventId, String marketId) throws IOException
+    public synchronized boolean withdraw(Budget budget, String eventId, String marketId, String player) throws IOException
     {
         if (balance >= budget.getRequested())
         {
             balance -= budget.getRequested();
 
-            log(Type.WITHDRAW, budget.getId(), eventId, marketId, budget.getRequested(), balance);
+            log(Type.WITHDRAW, budget.getId(), eventId, marketId, player, budget.getRequested(), balance);
 
             return true;
         }
         else
         {
-            log(Type.FAIL, budget.getId(), eventId, marketId, budget.getRequested(), balance);
+            log(Type.FAIL, budget.getId(), eventId, marketId, player, budget.getRequested(), balance);
         }
 
         return false;
     }
 
-    public synchronized void deposit(Budget budget, String eventId, String marketId, double profit) throws IOException
+    public synchronized void deposit(Budget budget, String eventId, String marketId, String player, double profit) throws IOException
     {
         balance += profit;
 
-        log(Type.DEPOSIT, budget.getId(), eventId, marketId, profit, balance);
+        log(Type.DEPOSIT, budget.getId(), eventId, marketId, player, profit, balance);
     }
 
-    private synchronized void log(Type type, int budgetId, String eventId, String marketId, double value, double balance) throws IOException
+    private synchronized void log(Type type, int budgetId, String eventId, String marketId, String player, double value, double balance) throws IOException
     {
         CsvLine csvLine = new CsvLine();
         csvLine.appendCurrentTimestamp();
@@ -69,6 +69,7 @@ public class Wallet
         csvLine.append(budgetId);
         csvLine.append(eventId);
         csvLine.append(marketId);
+        csvLine.append(player);
         csvLine.append(NumberUtils.round(value, 2));
         csvLine.append(NumberUtils.round(balance, 2));
 

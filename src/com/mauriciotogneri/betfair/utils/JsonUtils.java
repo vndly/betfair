@@ -34,8 +34,8 @@ public class JsonUtils
         }
         catch (Exception e)
         {
-            ErrorLog.log("ERROR CONVERTING JSON TO CLASS: " + clazz.getCanonicalName());
-            ErrorLog.log(json);
+            //ErrorLog.log("ERROR CONVERTING JSON TO CLASS: " + clazz.getCanonicalName());
+            //ErrorLog.log(json);
             ErrorLog.log(e);
 
             throw e;

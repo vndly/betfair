@@ -32,7 +32,10 @@ public class FundsMonitor extends AbstractMonitor
     {
         AccountFundsResponse accountFundsResponse = getAccountFunds.execute(session.appKey, session.getSessionToken());
 
-        FundsLog.log(accountFundsResponse);
+        if (accountFundsResponse != null)
+        {
+            FundsLog.log(accountFundsResponse);
+        }
 
         return isRunning();
     }
