@@ -12,7 +12,7 @@ public abstract class Strategy
 {
     public abstract void onClose(long timestamp, boolean executed) throws Exception;
 
-    public abstract void process(Tick tick) throws Exception;
+    public abstract boolean process(Tick tick) throws Exception;
 
     public static Strategy getStrategy(Session session, EventTypeEnum eventType, MarketTypeEnum marketType, String eventId, String marketId, List<Long> selections, String folderPath) throws IOException
     {

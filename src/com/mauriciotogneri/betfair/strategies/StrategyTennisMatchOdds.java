@@ -51,6 +51,7 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
     private static final int ONE_HOUR_AND_HALF_OF_PLAY = 1000 * 60 * 90; // one hour and half (01:30:00)
+    private static final int FIVE_HOURS_OF_PLAY = 1000 * 60 * 60 * 5; // five hours (05:00:00)
 
     private enum Player
     {
@@ -89,7 +90,7 @@ public class StrategyTennisMatchOdds extends Strategy
     }
 
     @Override
-    public void process(Tick tick) throws Exception
+    public boolean process(Tick tick) throws Exception
     {
         if (tick.timestamp > ONE_HOUR_BEFORE_START)
         {
@@ -113,6 +114,8 @@ public class StrategyTennisMatchOdds extends Strategy
 
             logPrice.write(csvLine);
         }
+
+        return betSimulationPlayerA.isBacked() || betSimulationPlayerB.isBacked() || (tick.timestamp < FIVE_HOURS_OF_PLAY);
     }
 
     private void processSelection(Player player, Selection selection, BetSimulation betSimulation, long timestamp) throws IOException
@@ -201,12 +204,14 @@ public class StrategyTennisMatchOdds extends Strategy
     {
         logActivity.writeLn("LOG PROFIT: " + player + " - " + JsonUtils.toJson(betSimulation));
 
+        Budget budget = betSimulation.getBudget();
         double profit = betSimulation.getProfit();
 
         CsvLine csvLine = new CsvLine();
         csvLine.appendCurrentTimestamp();
         csvLine.appendTimestamp(timestamp);
         csvLine.append(profit);
+        csvLine.append((budget != null) ? String.valueOf(budget.getId()) : "");
         csvLine.append(eventId);
         csvLine.append(marketId);
         csvLine.append(player.toString());
@@ -223,19 +228,17 @@ public class StrategyTennisMatchOdds extends Strategy
 
         ProfitLog.log(csvLine);
 
-        Budget budget = betSimulation.getBudget();
-
         if (budget != null)
         {
             if (profit >= 0)
             {
-                logActivity.writeLn("LOG DEPOSIT: " + player + " => " + profit + budget.getRequested());
+                logActivity.writeLn("LOG DEPOSIT WIN: " + player + " => " + (profit + budget.getRequested()));
 
                 Wallet.getInstance().deposit(budget, eventId, marketId, player.toString(), profit + budget.getRequested());
             }
             else
             {
-                logActivity.writeLn("LOG DEPOSIT: " + player + " => " + budget.getRest());
+                logActivity.writeLn("LOG DEPOSIT LOSE: " + player + " => " + budget.getRest());
 
                 Wallet.getInstance().deposit(budget, eventId, marketId, player.toString(), budget.getRest());
             }

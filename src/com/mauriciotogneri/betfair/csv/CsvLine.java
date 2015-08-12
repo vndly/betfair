@@ -24,7 +24,7 @@ public class CsvLine
         }
         else
         {
-            return append("-" + TimeUtils.getPeriod(timestamp));
+            return append("-" + TimeUtils.getPeriod(Math.abs(timestamp)));
         }
     }
 

@@ -105,10 +105,12 @@ public class StrategySoccerOverUnder15 extends Strategy
     }
 
     @Override
-    public void process(Tick tick) throws Exception
+    public boolean process(Tick tick) throws Exception
     {
         processAction(tick);
         logPrice(tick);
+
+        return true;
     }
 
     private void processAction(Tick tick) throws IOException

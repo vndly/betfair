@@ -19,7 +19,7 @@ public class Wallet
         FAIL
     }
 
-    private static final double DEFAULT_BALANCE = 10.00;
+    private static final double DEFAULT_BALANCE = 20.00;
 
     private Wallet(double balance) throws IOException
     {

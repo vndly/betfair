@@ -156,7 +156,7 @@ public class MarketMonitor extends AbstractMonitor
                 tick.add(selection);
             }
 
-            strategy.process(tick);
+            return strategy.process(tick);
         }
 
         return true;

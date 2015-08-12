@@ -24,6 +24,7 @@ public class ProfitLog
         csvLine.append("TIME");
         csvLine.append("MATCH TIME");
         csvLine.append("PROFIT");
+        csvLine.append("BUDGET ID");
         csvLine.append("EVENT ID");
         csvLine.append("MARKET ID");
         csvLine.append("PLAYER");

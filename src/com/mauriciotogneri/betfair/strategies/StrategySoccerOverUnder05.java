@@ -44,7 +44,7 @@ public class StrategySoccerOverUnder05 extends Strategy
     }
 
     @Override
-    public void process(Tick tick) throws Exception
+    public boolean process(Tick tick) throws Exception
     {
         Selection selection = tick.selections.get(1);
 
@@ -59,6 +59,8 @@ public class StrategySoccerOverUnder05 extends Strategy
 
             logPrice.write(csvLine);
         }
+
+        return true;
     }
 
     @Override
