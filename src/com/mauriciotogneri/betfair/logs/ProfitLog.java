@@ -25,15 +25,18 @@ public class ProfitLog
         csvLine.append("MATCH TIME");
         csvLine.append("PROFIT");
         csvLine.append("BUDGET ID");
+        csvLine.append("BUDGET FAILED");
         csvLine.append("EVENT ID");
         csvLine.append("MARKET ID");
         csvLine.append("PLAYER");
         csvLine.append("BACK TIME");
         csvLine.append("BACK PRICE");
         csvLine.append("BACK STEAK");
+        csvLine.append("BACK BET FAILED");
         csvLine.append("LAY TIME");
         csvLine.append("LAY PRICE");
         csvLine.append("LAY STEAK");
+        csvLine.append("LAY BET FAILED");
         csvLine.append("LAY PRICE AVG.");
         csvLine.append("LAY PRICE COUNT");
 

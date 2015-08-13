@@ -39,15 +39,9 @@ public class ThreadMonitor extends Thread
                 try
                 {
                     List<Thread> threads = getThreads();
+                    ThreadLog.log(threads);
 
-                    if (!threads.isEmpty())
-                    {
-                        ThreadLog.log(threads);
-                    }
-                    else
-                    {
-                        continueRunning = false;
-                    }
+                    continueRunning = !threads.isEmpty();
                 }
                 catch (Exception e)
                 {
