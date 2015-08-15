@@ -46,10 +46,12 @@ public class StrategyTennisMatchOdds extends Strategy
     private static final double MIN_BACK_PRICE = 1.1;
     private static final double MAX_BACK_PRICE = 4.0;
 
-    private static final double MAX_PRICE_DIFF = 1.1;
+    private static final double MAX_PRICE_DIFF = 1.05;
+    private static final double IDEAL_PRICE_FACTOR = 0.8;
     private static final double DEFAULT_STAKE = 2;
 
     private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
+    private static final int HALF_HOUR_OF_PLAY = 1000 * 60 * 30; // half hour (00:30:00)
     private static final int ONE_HOUR_AND_HALF_OF_PLAY = 1000 * 60 * 90; // one hour and half (01:30:00)
     private static final int FIVE_HOURS_OF_PLAY = 1000 * 60 * 60 * 5; // five hours (05:00:00)
 
@@ -154,7 +156,7 @@ public class StrategyTennisMatchOdds extends Strategy
                 consecutiveValidBacks = 0;
             }
         }
-        else if (validLay(betSimulation.priceBack, selection.lay))
+        else if (validLay(betSimulation.priceBack, selection.lay, timestamp))
         {
             if (!betSimulation.isLaid())
             {
@@ -176,12 +178,22 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private boolean validBack(double priceBack, double priceLay, long timestamp)
     {
-        return (priceBack >= MIN_BACK_PRICE) && (priceBack <= MAX_BACK_PRICE) && ((priceLay / priceBack) <= MAX_PRICE_DIFF) && (timestamp <= ONE_HOUR_AND_HALF_OF_PLAY);
+        boolean minPriceValueValid = priceBack >= MIN_BACK_PRICE;
+        boolean maxPriceValueValid = priceBack <= MAX_BACK_PRICE;
+        boolean maxPriceDiffValid = (priceLay / priceBack) <= MAX_PRICE_DIFF;
+        boolean maxTimeLimitValid = timestamp <= ONE_HOUR_AND_HALF_OF_PLAY;
+
+        return (minPriceValueValid && maxPriceValueValid && maxPriceDiffValid && maxTimeLimitValid);
     }
 
-    private boolean validLay(double priceBack, double priceLay)
+    private boolean validLay(double priceBack, double priceLay, long timestamp)
     {
-        return (priceLay < priceBack) && (priceLay > 0);
+        boolean priceLowerThanBack = priceLay < priceBack;
+        boolean priceBiggerThanZero = priceLay > 0;
+        boolean isAfterHalfHour = timestamp > HALF_HOUR_OF_PLAY;
+        boolean idealPriceValid = priceLay <= (priceBack * IDEAL_PRICE_FACTOR);
+
+        return (priceLowerThanBack && priceBiggerThanZero && (isAfterHalfHour || idealPriceValid));
     }
 
     private void logAction(Player player, long timestamp, String text) throws IOException

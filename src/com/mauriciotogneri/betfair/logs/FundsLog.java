@@ -3,6 +3,7 @@ package com.mauriciotogneri.betfair.logs;
 import com.mauriciotogneri.betfair.api.accounts.GetAccountFunds.AccountFundsResponse;
 import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.dependency.AppObjectProvider;
+import com.mauriciotogneri.betfair.utils.NotificationUtils;
 
 public class FundsLog
 {
@@ -28,6 +29,8 @@ public class FundsLog
             csvLine.append(funds);
 
             write(csvLine);
+
+            NotificationUtils.sendNotificationFunds(funds);
         }
     }
 

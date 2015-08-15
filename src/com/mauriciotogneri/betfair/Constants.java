@@ -34,6 +34,12 @@ public class Constants
         public static final String ACTIONS_LOG_FILE = "actions.csv";
     }
 
+    public static class Email
+    {
+        public static final String SENDER_EMAIL = "betbot@zeronest.com";
+        public static final String RECEIVER_EMAIL = "mauricio.togneri@gmail.com";
+    }
+
     public static class Execution
     {
         public static final String IS_RUNNING_FLAG = "running.txt";

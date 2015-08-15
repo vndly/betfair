@@ -4,6 +4,7 @@ import com.mauriciotogneri.betfair.Constants.Execution;
 import com.mauriciotogneri.betfair.logs.ErrorLog;
 import com.mauriciotogneri.betfair.logs.ThreadLog;
 import com.mauriciotogneri.betfair.utils.IoUtils;
+import com.mauriciotogneri.betfair.utils.NotificationUtils;
 import com.mauriciotogneri.betfair.utils.StringUtils;
 
 import java.io.IOException;
@@ -61,7 +62,7 @@ public class ThreadMonitor extends Thread
         }
         finally
         {
-            // TODO: SEND EMAIL TO NOTIFY THE BOT HAS FINISHED
+            NotificationUtils.sendNotificationFinished();
         }
     }
 
