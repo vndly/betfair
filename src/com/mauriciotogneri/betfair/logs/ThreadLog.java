@@ -12,7 +12,7 @@ public class ThreadLog
     {
         try
         {
-            AppObjectProvider.getThreaddLog().writeLn(TimeUtils.getTimestamp() + "\t" + getMessage(threads));
+            AppObjectProvider.getThreadLog().writeLn(TimeUtils.getTimestamp() + "\t" + getMessage(threads));
         }
         catch (Exception e)
         {

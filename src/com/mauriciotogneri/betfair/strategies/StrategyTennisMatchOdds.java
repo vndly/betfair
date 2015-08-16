@@ -7,9 +7,9 @@ import com.mauriciotogneri.betfair.api.base.Types.CancelExecutionReport;
 import com.mauriciotogneri.betfair.api.base.Types.PlaceExecutionReport;
 import com.mauriciotogneri.betfair.api.betting.CancelOrders;
 import com.mauriciotogneri.betfair.api.betting.PlaceOrders;
-import com.mauriciotogneri.betfair.csv.CsvFile;
-import com.mauriciotogneri.betfair.csv.CsvLine;
+import com.mauriciotogneri.betfair.logs.ActionsLog;
 import com.mauriciotogneri.betfair.logs.LogWriter;
+import com.mauriciotogneri.betfair.logs.PriceLog;
 import com.mauriciotogneri.betfair.logs.ProfitLog;
 import com.mauriciotogneri.betfair.models.Bet;
 import com.mauriciotogneri.betfair.models.BetInstruction;
@@ -30,30 +30,24 @@ public class StrategyTennisMatchOdds extends Strategy
     private final Session session;
     private final HttpClient httpClient;
 
-    private final CsvFile logPrice;
+    private final PriceLog logPrice;
     private final LogWriter logActivity;
     private final LogWriter logBets;
-    private final CsvFile logActionsPlayerA;
-    private final CsvFile logActionsPlayerB;
-
-    private int consecutiveValidBacks = 0;
+    private final ActionsLog logActionsPlayerA;
+    private final ActionsLog logActionsPlayerB;
 
     private final BetSimulation betSimulationPlayerA = new BetSimulation();
     private final BetSimulation betSimulationPlayerB = new BetSimulation();
 
     private static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
+    private static final int MAX_BUDGET_REQUEST_FAILS = 10;
 
     private static final double MIN_BACK_PRICE = 1.1;
     private static final double MAX_BACK_PRICE = 4.0;
 
-    private static final double MAX_PRICE_DIFF = 1.05;
+    private static final double MAX_PRICE_DIFF = 1.1;
     private static final double IDEAL_PRICE_FACTOR = 0.8;
     private static final double DEFAULT_STAKE = 2;
-
-    private static final int ONE_HOUR_BEFORE_START = -(1000 * 60 * 60); // minus one hour (-01:00:00)
-    private static final int HALF_HOUR_OF_PLAY = 1000 * 60 * 30; // half hour (00:30:00)
-    private static final int ONE_HOUR_AND_HALF_OF_PLAY = 1000 * 60 * 90; // one hour and half (01:30:00)
-    private static final int FIVE_HOURS_OF_PLAY = 1000 * 60 * 60 * 5; // five hours (05:00:00)
 
     private enum Player
     {
@@ -68,33 +62,17 @@ public class StrategyTennisMatchOdds extends Strategy
         this.marketId = marketId;
         this.httpClient = HttpClient.getDefault();
 
-        this.logPrice = new CsvFile(logFolderPath + Log.PRICES_LOG_FILE);
+        this.logPrice = new PriceLog(logFolderPath + Log.PRICES_LOG_FILE, selections);
         this.logActivity = new LogWriter(logFolderPath + Log.ACTIVITY_LOG_FILE);
         this.logBets = new LogWriter(logFolderPath + Log.BETS_LOG_FILE);
-        this.logActionsPlayerA = new CsvFile(logFolderPath + "actionsA.csv");
-        this.logActionsPlayerB = new CsvFile(logFolderPath + "actionsB.csv");
-
-        initLogPrice(logPrice, selections);
-    }
-
-    private void initLogPrice(CsvFile logPrice, List<Long> selections) throws IOException
-    {
-        CsvLine csvLine = new CsvLine();
-        csvLine.separator();
-
-        for (Long selectionId : selections)
-        {
-            csvLine.append(selectionId + "-back");
-            csvLine.append(selectionId + "-lay");
-        }
-
-        logPrice.write(csvLine);
+        this.logActionsPlayerA = new ActionsLog(logFolderPath + "actionsA.csv");
+        this.logActionsPlayerB = new ActionsLog(logFolderPath + "actionsB.csv");
     }
 
     @Override
     public boolean process(Tick tick) throws Exception
     {
-        if (tick.timestamp > ONE_HOUR_BEFORE_START)
+        if (isMoreThan(tick.timestamp, -1))
         {
             if (tick.timestamp > 0)
             {
@@ -105,19 +83,10 @@ public class StrategyTennisMatchOdds extends Strategy
                 processSelection(Player.PLAYER_B, selectionPlayerB, betSimulationPlayerB, tick.timestamp);
             }
 
-            CsvLine csvLine = new CsvLine();
-            csvLine.appendTimestamp(tick.timestamp);
-
-            for (Selection selection : tick.selections)
-            {
-                csvLine.append(NumberUtils.format(selection.back));
-                csvLine.append(NumberUtils.format(selection.lay));
-            }
-
-            logPrice.write(csvLine);
+            logPrice.log(tick.timestamp, tick.selections);
         }
 
-        return betSimulationPlayerA.isBacked() || betSimulationPlayerB.isBacked() || (tick.timestamp < FIVE_HOURS_OF_PLAY);
+        return (betSimulationPlayerA.isBacked() || betSimulationPlayerB.isBacked() || isLessThan(tick.timestamp, 5));
     }
 
     private void processSelection(Player player, Selection selection, BetSimulation betSimulation, long timestamp) throws IOException
@@ -126,9 +95,7 @@ public class StrategyTennisMatchOdds extends Strategy
         {
             if (validBack(selection.back, selection.lay, timestamp))
             {
-                consecutiveValidBacks++;
-
-                if (consecutiveValidBacks >= MIN_CONSECUTIVE_VALID_BACKS)
+                if (betSimulation.addConsecutiveValidBack() && betSimulation.failedBudgetRequestValid())
                 {
                     Budget budget = new Budget(selection.back * DEFAULT_STAKE);
 
@@ -153,7 +120,7 @@ public class StrategyTennisMatchOdds extends Strategy
             }
             else
             {
-                consecutiveValidBacks = 0;
+                betSimulation.resetConsecutiveValidBack();
             }
         }
         else if (validLay(betSimulation.priceBack, selection.lay, timestamp))
@@ -181,35 +148,32 @@ public class StrategyTennisMatchOdds extends Strategy
         boolean minPriceValueValid = priceBack >= MIN_BACK_PRICE;
         boolean maxPriceValueValid = priceBack <= MAX_BACK_PRICE;
         boolean maxPriceDiffValid = (priceLay / priceBack) <= MAX_PRICE_DIFF;
-        boolean maxTimeLimitValid = timestamp <= ONE_HOUR_AND_HALF_OF_PLAY;
+        boolean minTimeLimitValid = isMoreThan(timestamp, 0.25);
+        boolean maxTimeLimitValid = isLessThan(timestamp, 1);
 
-        return (minPriceValueValid && maxPriceValueValid && maxPriceDiffValid && maxTimeLimitValid);
+        return (minPriceValueValid && maxPriceValueValid && maxPriceDiffValid && minTimeLimitValid && maxTimeLimitValid);
     }
 
     private boolean validLay(double priceBack, double priceLay, long timestamp)
     {
         boolean priceLowerThanBack = priceLay < priceBack;
         boolean priceBiggerThanZero = priceLay > 0;
-        boolean isAfterHalfHour = timestamp > HALF_HOUR_OF_PLAY;
+        boolean isAfterHalfHour = isMoreThan(timestamp, 0.5);
         boolean idealPriceValid = priceLay <= (priceBack * IDEAL_PRICE_FACTOR);
 
         return (priceLowerThanBack && priceBiggerThanZero && (isAfterHalfHour || idealPriceValid));
     }
 
-    private void logAction(Player player, long timestamp, String text) throws IOException
+    private void logAction(Player player, long timestamp, String action) throws IOException
     {
-        CsvLine csvLine = new CsvLine();
-        csvLine.appendTimestamp(timestamp);
-        csvLine.append(text);
-
         switch (player)
         {
             case PLAYER_A:
-                logActionsPlayerA.write(csvLine);
+                logActionsPlayerA.log(timestamp, action);
                 break;
 
             case PLAYER_B:
-                logActionsPlayerB.write(csvLine);
+                logActionsPlayerB.log(timestamp, action);
                 break;
         }
     }
@@ -220,31 +184,9 @@ public class StrategyTennisMatchOdds extends Strategy
 
         Budget budget = betSimulation.budget;
         double profit = betSimulation.getProfit();
+        String budgetId = (budget != null) ? String.valueOf(budget.getId()) : "";
 
-        CsvLine csvLine = new CsvLine();
-        csvLine.appendCurrentTimestamp();
-        csvLine.appendTimestamp(timestamp);
-        csvLine.append(profit);
-        csvLine.append((budget != null) ? String.valueOf(budget.getId()) : "");
-        csvLine.append(betSimulation.budgetRequestsFailed);
-        csvLine.append(eventId);
-        csvLine.append(marketId);
-        csvLine.append(player.toString());
-
-        csvLine.appendTimestamp(betSimulation.timestampBack);
-        csvLine.append(betSimulation.priceBack);
-        csvLine.append(betSimulation.stakeBack);
-        csvLine.append(betSimulation.backBetFailed);
-
-        csvLine.appendTimestamp(betSimulation.timestampLay);
-        csvLine.append(betSimulation.priceLay);
-        csvLine.append(betSimulation.stakeLay);
-        csvLine.append(betSimulation.layBetFailed);
-
-        csvLine.append(betSimulation.getLowPriceAverage());
-        csvLine.append(betSimulation.lowPriceCount);
-
-        ProfitLog.log(csvLine);
+        ProfitLog.log(timestamp, profit, budgetId, betSimulation, eventId, marketId, player.toString());
 
         if (budget != null)
         {
@@ -265,6 +207,16 @@ public class StrategyTennisMatchOdds extends Strategy
         {
             logActivity.writeLn("LOG NO BUDGET ACQUIRED: " + player);
         }
+    }
+
+    private boolean isMoreThan(long timestamp, double hours)
+    {
+        return timestamp >= (1000 * 60 * (60 * hours));
+    }
+
+    private boolean isLessThan(long timestamp, double hours)
+    {
+        return timestamp <= (1000 * 60 * (60 * hours));
     }
 
     @Override
@@ -340,7 +292,7 @@ public class StrategyTennisMatchOdds extends Strategy
         return null;
     }
 
-    private static class BetSimulation
+    public static class BetSimulation
     {
         private Budget budget = null;
 
@@ -355,8 +307,10 @@ public class StrategyTennisMatchOdds extends Strategy
         private int layBetFailed = 0;
 
         private double lowPriceSum = 0;
+
         private int lowPriceCount = 0;
 
+        private int consecutiveValidBacks = 0;
         private int budgetRequestsFailed = 0;
 
         public boolean placeBackBet(double price, long timestamp, Budget requestedBudget)
@@ -402,9 +356,71 @@ public class StrategyTennisMatchOdds extends Strategy
             return placed;
         }
 
+        public double getPriceBack()
+        {
+            return priceBack;
+        }
+
+        public double getStakeBack()
+        {
+            return stakeBack;
+        }
+
+        public long getTimestampBack()
+        {
+            return timestampBack;
+        }
+
+        public int getBackBetFailed()
+        {
+            return backBetFailed;
+        }
+
+        public double getPriceLay()
+        {
+            return priceLay;
+        }
+
+        public double getStakeLay()
+        {
+            return stakeLay;
+        }
+
+        public long getTimestampLay()
+        {
+            return timestampLay;
+        }
+
+        public int getLayBetFailed()
+        {
+            return layBetFailed;
+        }
+
+        public int getBudgetRequestsFailed()
+        {
+            return budgetRequestsFailed;
+        }
+
+        public boolean addConsecutiveValidBack()
+        {
+            consecutiveValidBacks++;
+
+            return consecutiveValidBacks >= MIN_CONSECUTIVE_VALID_BACKS;
+        }
+
+        public void resetConsecutiveValidBack()
+        {
+            consecutiveValidBacks = 0;
+        }
+
         public void failBudgetRequest()
         {
             budgetRequestsFailed++;
+        }
+
+        public boolean failedBudgetRequestValid()
+        {
+            return budgetRequestsFailed < MAX_BUDGET_REQUEST_FAILS;
         }
 
         public void saveLowPrice(double value)
@@ -416,6 +432,11 @@ public class StrategyTennisMatchOdds extends Strategy
         public double getLowPriceAverage()
         {
             return (lowPriceCount > 0) ? NumberUtils.round(lowPriceSum / lowPriceCount, 2) : 0;
+        }
+
+        public int getLowPriceCount()
+        {
+            return lowPriceCount;
         }
 
         public boolean isBacked()

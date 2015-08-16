@@ -28,6 +28,12 @@ public class CustomObjectProvider implements ObjectProvider
     }
 
     @Override
+    public LogWriter getActivityLog() throws IOException
+    {
+        return (activityLog == null) ? (activityLog = new LogWriter(Log.ACTIVITY_LOG_PATH)) : activityLog;
+    }
+
+    @Override
     public CsvFile getProfitLog() throws IOException
     {
         return (profitLog == null) ? (profitLog = new CsvFile(Log.PROFIT_LOG_PATH)) : profitLog;
@@ -37,12 +43,6 @@ public class CustomObjectProvider implements ObjectProvider
     public CsvFile getWalletLog() throws IOException
     {
         return (walletLog == null) ? (walletLog = new CsvFile(Log.WALLET_LOG_PATH)) : walletLog;
-    }
-
-    @Override
-    public LogWriter getActivityLog() throws IOException
-    {
-        return (activityLog == null) ? (activityLog = new LogWriter(Log.ACTIVITY_LOG_PATH)) : activityLog;
     }
 
     @Override

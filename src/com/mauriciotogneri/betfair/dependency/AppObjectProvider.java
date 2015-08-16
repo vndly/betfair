@@ -19,9 +19,14 @@ public class AppObjectProvider
         return instance.getErrorLog();
     }
 
-    public static LogWriter getThreaddLog() throws IOException
+    public static LogWriter getThreadLog() throws IOException
     {
         return instance.getThreadLog();
+    }
+
+    public static LogWriter getActivityLog() throws IOException
+    {
+        return instance.getActivityLog();
     }
 
     public static CsvFile getProfitLog() throws IOException
@@ -32,11 +37,6 @@ public class AppObjectProvider
     public static CsvFile getWalletLog() throws IOException
     {
         return instance.getWalletLog();
-    }
-
-    public static LogWriter getActivityLog() throws IOException
-    {
-        return instance.getActivityLog();
     }
 
     public static CsvFile getFundsLog() throws IOException

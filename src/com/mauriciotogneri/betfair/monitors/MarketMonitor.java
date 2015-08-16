@@ -12,8 +12,7 @@ import com.mauriciotogneri.betfair.api.base.Types.MarketCatalogue;
 import com.mauriciotogneri.betfair.api.base.Types.PriceSize;
 import com.mauriciotogneri.betfair.api.base.Types.Runner;
 import com.mauriciotogneri.betfair.api.betting.ListMarketBook;
-import com.mauriciotogneri.betfair.csv.CsvFile;
-import com.mauriciotogneri.betfair.csv.CsvLine;
+import com.mauriciotogneri.betfair.logs.StatusLog;
 import com.mauriciotogneri.betfair.models.Selection;
 import com.mauriciotogneri.betfair.models.Tick;
 import com.mauriciotogneri.betfair.strategies.Strategy;
@@ -35,7 +34,7 @@ public class MarketMonitor extends AbstractMonitor
     private final MarketCatalogue marketCatalogue;
     private final String logFolderPath;
 
-    private CsvFile logStatus;
+    private StatusLog logStatus;
 
     private Strategy strategy;
 
@@ -71,7 +70,7 @@ public class MarketMonitor extends AbstractMonitor
 
         eventStartTime = TimeUtils.dateToMilliseconds(event.openDate, "UTC");
 
-        logStatus = new CsvFile(logFolderPath + Constants.Log.STATUS_LOG_FILE);
+        logStatus = new StatusLog(logFolderPath + Constants.Log.STATUS_LOG_FILE);
 
         listMarketBook = ListMarketBook.getRequest(httpClient, session, marketId);
 
@@ -109,11 +108,7 @@ public class MarketMonitor extends AbstractMonitor
         {
             if (marketBook.status != MarketStatus.OPEN)
             {
-                CsvLine csvLine = new CsvLine();
-                csvLine.appendTimestamp(timestamp);
-                csvLine.append(marketBook.status.toString());
-
-                logStatus.write(csvLine);
+                logStatus.log(timestamp, marketBook.status.toString());
             }
         }
 
