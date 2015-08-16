@@ -21,6 +21,9 @@ public class Constants
 
     public static class BetRules
     {
+        public static final int START_HOUR_TO_PROCESS = -1;
+        public static final int MAX_HOUR_TO_PROCESS = 5;
+
         public static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
         public static final int MAX_BUDGET_REQUEST_FAILS = 10;
 

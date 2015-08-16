@@ -4,8 +4,6 @@ import com.mauriciotogneri.betfair.utils.NumberUtils;
 
 public class BetSimulation
 {
-    private Budget budget = null;
-
     private double priceBack = 0;
     private double stakeBack = 0;
     private long timestampBack = 0;
@@ -17,53 +15,37 @@ public class BetSimulation
     private int layBetFailed = 0;
 
     private double lowPriceSum = 0;
-
     private int lowPriceCount = 0;
 
     private int consecutiveValidBacks = 0;
     private int budgetRequestsFailed = 0;
 
-    public boolean placeBackBet(double price, double stake, long timestamp, Budget requestedBudget)
+    public double placeBackBet(double price, double stake, long timestamp)
     {
-        boolean placed = true; // TODO
+        priceBack = price;
+        stakeBack = stake;
+        timestampBack = timestamp;
 
-        if (placed)
-        {
-            budget = requestedBudget;
-
-            priceBack = price;
-            stakeBack = stake;
-            timestampBack = timestamp;
-
-            budget.use(stakeBack);
-        }
-        else
-        {
-            backBetFailed++;
-        }
-
-        return placed;
+        return stake;
     }
 
-    public boolean placeLayBet(double price, long timestamp)
+    public void backBetFailed()
     {
-        boolean placed = true; // TODO
+        backBetFailed++;
+    }
 
-        if (placed)
-        {
-            priceLay = price;
-            stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
-            timestampLay = timestamp;
+    public double placeLayBet(double price, long timestamp)
+    {
+        priceLay = price;
+        stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
+        timestampLay = timestamp;
 
-            double liability = (priceLay * stakeLay) * stakeLay;
-            budget.use(liability);
-        }
-        else
-        {
-            layBetFailed++;
-        }
+        return (priceLay * stakeLay) * stakeLay; // liability
+    }
 
-        return placed;
+    public void layBetFailed()
+    {
+        layBetFailed++;
     }
 
     public double getPriceBack()
@@ -131,11 +113,6 @@ public class BetSimulation
     public boolean failedBudgetRequestValid(int maxBudgetRequestFails)
     {
         return budgetRequestsFailed < maxBudgetRequestFails;
-    }
-
-    public Budget getBudget()
-    {
-        return budget;
     }
 
     public void saveLowPrice(double value)

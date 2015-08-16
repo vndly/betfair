@@ -121,10 +121,8 @@ public class MarketMonitor extends AbstractMonitor
         {
             Tick tick = new Tick(timestamp);
 
-            for (int i = 0; i < selections.size(); i++)
+            for (Long selectionId : selections)
             {
-                Long selectionId = selections.get(i);
-
                 double back = 0;
                 double lay = 0;
 
@@ -147,7 +145,7 @@ public class MarketMonitor extends AbstractMonitor
                     }
                 }
 
-                Selection selection = new Selection(selectionId, back, lay, i);
+                Selection selection = new Selection(back, lay);
                 tick.add(selection);
             }
 
