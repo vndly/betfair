@@ -1,5 +1,6 @@
 package com.mauriciotogneri.betfair.strategies;
 
+import com.mauriciotogneri.betfair.Constants.BetRules;
 import com.mauriciotogneri.betfair.Constants.Log;
 import com.mauriciotogneri.betfair.api.base.HttpClient;
 import com.mauriciotogneri.betfair.api.base.Session;
@@ -13,12 +14,12 @@ import com.mauriciotogneri.betfair.logs.PriceLog;
 import com.mauriciotogneri.betfair.logs.ProfitLog;
 import com.mauriciotogneri.betfair.models.Bet;
 import com.mauriciotogneri.betfair.models.BetInstruction;
+import com.mauriciotogneri.betfair.models.BetSimulation;
 import com.mauriciotogneri.betfair.models.Budget;
 import com.mauriciotogneri.betfair.models.Selection;
 import com.mauriciotogneri.betfair.models.Tick;
 import com.mauriciotogneri.betfair.models.Wallet;
 import com.mauriciotogneri.betfair.utils.JsonUtils;
-import com.mauriciotogneri.betfair.utils.NumberUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,16 +39,6 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private final BetSimulation betSimulationPlayerA = new BetSimulation();
     private final BetSimulation betSimulationPlayerB = new BetSimulation();
-
-    private static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
-    private static final int MAX_BUDGET_REQUEST_FAILS = 10;
-
-    private static final double MIN_BACK_PRICE = 1.1;
-    private static final double MAX_BACK_PRICE = 4.0;
-
-    private static final double MAX_PRICE_DIFF = 1.1;
-    private static final double IDEAL_PRICE_FACTOR = 0.8;
-    private static final double DEFAULT_STAKE = 2;
 
     private enum Player
     {
@@ -95,17 +86,17 @@ public class StrategyTennisMatchOdds extends Strategy
         {
             if (validBack(selection.back, selection.lay, timestamp))
             {
-                if (betSimulation.addConsecutiveValidBack() && betSimulation.failedBudgetRequestValid())
+                if (betSimulation.addConsecutiveValidBack(BetRules.MIN_CONSECUTIVE_VALID_BACKS) && betSimulation.failedBudgetRequestValid(BetRules.MAX_BUDGET_REQUEST_FAILS))
                 {
-                    Budget budget = new Budget(selection.back * DEFAULT_STAKE);
+                    Budget budget = new Budget(selection.back * BetRules.DEFAULT_STAKE);
 
                     if (Wallet.getInstance().withdraw(budget, eventId, marketId, player.toString()))
                     {
-                        boolean betPlaced = betSimulation.placeBackBet(selection.back, timestamp, budget);
+                        boolean betPlaced = betSimulation.placeBackBet(selection.back, BetRules.DEFAULT_STAKE, timestamp, budget);
 
                         if (betPlaced)
                         {
-                            logAction(player, timestamp, "BACKED AT: " + betSimulation.priceBack);
+                            logAction(player, timestamp, "BACKED AT: " + betSimulation.getPriceBack());
                         }
                         else
                         {
@@ -123,7 +114,7 @@ public class StrategyTennisMatchOdds extends Strategy
                 betSimulation.resetConsecutiveValidBack();
             }
         }
-        else if (validLay(betSimulation.priceBack, selection.lay, timestamp))
+        else if (validLay(betSimulation.getPriceBack(), selection.lay, timestamp))
         {
             if (!betSimulation.isLaid())
             {
@@ -145,9 +136,9 @@ public class StrategyTennisMatchOdds extends Strategy
 
     private boolean validBack(double priceBack, double priceLay, long timestamp)
     {
-        boolean minPriceValueValid = priceBack >= MIN_BACK_PRICE;
-        boolean maxPriceValueValid = priceBack <= MAX_BACK_PRICE;
-        boolean maxPriceDiffValid = (priceLay / priceBack) <= MAX_PRICE_DIFF;
+        boolean minPriceValueValid = priceBack >= BetRules.MIN_BACK_PRICE;
+        boolean maxPriceValueValid = priceBack <= BetRules.MAX_BACK_PRICE;
+        boolean maxPriceDiffValid = (priceLay / priceBack) <= BetRules.MAX_PRICE_DIFF;
         boolean minTimeLimitValid = isMoreThan(timestamp, 0.25);
         boolean maxTimeLimitValid = isLessThan(timestamp, 1);
 
@@ -159,7 +150,7 @@ public class StrategyTennisMatchOdds extends Strategy
         boolean priceLowerThanBack = priceLay < priceBack;
         boolean priceBiggerThanZero = priceLay > 0;
         boolean isAfterHalfHour = isMoreThan(timestamp, 0.5);
-        boolean idealPriceValid = priceLay <= (priceBack * IDEAL_PRICE_FACTOR);
+        boolean idealPriceValid = priceLay <= (priceBack * BetRules.IDEAL_PRICE_FACTOR);
 
         return (priceLowerThanBack && priceBiggerThanZero && (isAfterHalfHour || idealPriceValid));
     }
@@ -182,7 +173,7 @@ public class StrategyTennisMatchOdds extends Strategy
     {
         logActivity.writeLn("LOG PROFIT: " + player + " - " + JsonUtils.toJson(betSimulation));
 
-        Budget budget = betSimulation.budget;
+        Budget budget = betSimulation.getBudget();
         double profit = betSimulation.getProfit();
         String budgetId = (budget != null) ? String.valueOf(budget.getId()) : "";
 
@@ -290,183 +281,5 @@ public class StrategyTennisMatchOdds extends Strategy
         }
 
         return null;
-    }
-
-    public static class BetSimulation
-    {
-        private Budget budget = null;
-
-        private double priceBack = 0;
-        private double stakeBack = 0;
-        private long timestampBack = 0;
-        private int backBetFailed = 0;
-
-        private double priceLay = 0;
-        private double stakeLay = 0;
-        private long timestampLay = 0;
-        private int layBetFailed = 0;
-
-        private double lowPriceSum = 0;
-
-        private int lowPriceCount = 0;
-
-        private int consecutiveValidBacks = 0;
-        private int budgetRequestsFailed = 0;
-
-        public boolean placeBackBet(double price, long timestamp, Budget requestedBudget)
-        {
-            boolean placed = true; // TODO
-
-            if (placed)
-            {
-                budget = requestedBudget;
-
-                priceBack = price;
-                stakeBack = DEFAULT_STAKE;
-                timestampBack = timestamp;
-
-                budget.use(stakeBack);
-            }
-            else
-            {
-                backBetFailed++;
-            }
-
-            return placed;
-        }
-
-        public boolean placeLayBet(double price, long timestamp)
-        {
-            boolean placed = true; // TODO
-
-            if (placed)
-            {
-                priceLay = price;
-                stakeLay = NumberUtils.round((stakeBack * priceBack) / priceLay, 2);
-                timestampLay = timestamp;
-
-                double liability = (priceLay * stakeLay) * stakeLay;
-                budget.use(liability);
-            }
-            else
-            {
-                layBetFailed++;
-            }
-
-            return placed;
-        }
-
-        public double getPriceBack()
-        {
-            return priceBack;
-        }
-
-        public double getStakeBack()
-        {
-            return stakeBack;
-        }
-
-        public long getTimestampBack()
-        {
-            return timestampBack;
-        }
-
-        public int getBackBetFailed()
-        {
-            return backBetFailed;
-        }
-
-        public double getPriceLay()
-        {
-            return priceLay;
-        }
-
-        public double getStakeLay()
-        {
-            return stakeLay;
-        }
-
-        public long getTimestampLay()
-        {
-            return timestampLay;
-        }
-
-        public int getLayBetFailed()
-        {
-            return layBetFailed;
-        }
-
-        public int getBudgetRequestsFailed()
-        {
-            return budgetRequestsFailed;
-        }
-
-        public boolean addConsecutiveValidBack()
-        {
-            consecutiveValidBacks++;
-
-            return consecutiveValidBacks >= MIN_CONSECUTIVE_VALID_BACKS;
-        }
-
-        public void resetConsecutiveValidBack()
-        {
-            consecutiveValidBacks = 0;
-        }
-
-        public void failBudgetRequest()
-        {
-            budgetRequestsFailed++;
-        }
-
-        public boolean failedBudgetRequestValid()
-        {
-            return budgetRequestsFailed < MAX_BUDGET_REQUEST_FAILS;
-        }
-
-        public void saveLowPrice(double value)
-        {
-            lowPriceSum += value;
-            lowPriceCount++;
-        }
-
-        public double getLowPriceAverage()
-        {
-            return (lowPriceCount > 0) ? NumberUtils.round(lowPriceSum / lowPriceCount, 2) : 0;
-        }
-
-        public int getLowPriceCount()
-        {
-            return lowPriceCount;
-        }
-
-        public boolean isBacked()
-        {
-            return (priceBack != 0);
-        }
-
-        public boolean isLaid()
-        {
-            return (priceLay != 0);
-        }
-
-        public double getProfit()
-        {
-            if (priceBack != 0)
-            {
-                if (priceLay != 0)
-                {
-                    double ifWin = (stakeBack * priceBack) - stakeBack;
-                    double ifLose = (stakeLay * priceLay) - stakeLay;
-
-                    return NumberUtils.round(ifWin - ifLose, 2);
-                }
-                else
-                {
-                    return -stakeBack; // we assume that we lose the bet
-                }
-            }
-
-            return 0;
-        }
     }
 }

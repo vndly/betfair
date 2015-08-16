@@ -2,6 +2,6 @@
 /.idea
 /logs
 /src/META-INF
-Betfair.iml
+*.iml
 config.json
 running.txt

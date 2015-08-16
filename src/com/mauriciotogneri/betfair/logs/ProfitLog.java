@@ -2,7 +2,7 @@ package com.mauriciotogneri.betfair.logs;
 
 import com.mauriciotogneri.betfair.csv.CsvLine;
 import com.mauriciotogneri.betfair.dependency.AppObjectProvider;
-import com.mauriciotogneri.betfair.strategies.StrategyTennisMatchOdds.BetSimulation;
+import com.mauriciotogneri.betfair.models.BetSimulation;
 
 public class ProfitLog
 {

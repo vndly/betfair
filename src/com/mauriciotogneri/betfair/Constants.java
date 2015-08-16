@@ -2,6 +2,10 @@ package com.mauriciotogneri.betfair;
 
 public class Constants
 {
+    private Constants()
+    {
+    }
+
     public static class Debug
     {
         public static final boolean ENABLE_LOGS = false;
@@ -13,6 +17,19 @@ public class Constants
             public static final boolean PRINT_PARAMETERS = true;
             public static final boolean PRINT_RESPONSE = true;
         }
+    }
+
+    public static class BetRules
+    {
+        public static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
+        public static final int MAX_BUDGET_REQUEST_FAILS = 10;
+
+        public static final double MIN_BACK_PRICE = 1.1;
+        public static final double MAX_BACK_PRICE = 4.0;
+
+        public static final double MAX_PRICE_DIFF = 1.1;
+        public static final double IDEAL_PRICE_FACTOR = 0.8;
+        public static final double DEFAULT_STAKE = 2;
     }
 
     public static class Log
