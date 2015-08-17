@@ -24,7 +24,7 @@ import com.mauriciotogneri.betfair.utils.JsonUtils;
 import java.io.IOException;
 import java.util.List;
 
-public class StrategyTennisMatchOddsCustom extends StrategyTennisMatchOdds
+public class StrategyTennisMatchOddsDefault extends StrategyTennisMatchOdds
 {
     private final String eventId;
     private final String marketId;
@@ -40,7 +40,7 @@ public class StrategyTennisMatchOddsCustom extends StrategyTennisMatchOdds
     private Budget budgetPlayerA = null;
     private Budget budgetPlayerB = null;
 
-    public StrategyTennisMatchOddsCustom(Session session, String eventId, String marketId, List<Long> selections, String logFolderPath) throws IOException
+    public StrategyTennisMatchOddsDefault(Session session, String eventId, String marketId, List<Long> selections, String logFolderPath) throws IOException
     {
         this.session = session;
         this.eventId = eventId;

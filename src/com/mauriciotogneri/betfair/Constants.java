@@ -21,8 +21,13 @@ public class Constants
 
     public static class BetRules
     {
-        public static final int START_HOUR_TO_PROCESS = -1;
-        public static final int MAX_HOUR_TO_PROCESS = 5;
+        public static final double MIN_HOUR_TO_PROCESS = -1;
+        public static final double MAX_HOUR_TO_PROCESS = 5;
+
+        public static final double MIN_HOUR_TO_BACK = -0.5;
+        public static final double MAX_HOUR_TO_BACK = 1;
+
+        public static final double MAX_TIME_IDEAL_LAY = 0.5;
 
         public static final int MIN_CONSECUTIVE_VALID_BACKS = 3;
         public static final int MAX_BUDGET_REQUEST_FAILS = 10;
@@ -30,7 +35,7 @@ public class Constants
         public static final double MIN_BACK_PRICE = 1.1;
         public static final double MAX_BACK_PRICE = 4.0;
 
-        public static final double MAX_PRICE_DIFF = 1.1;
+        public static final double MAX_PRICE_DIFF = 1.05;
         public static final double IDEAL_PRICE_FACTOR = 0.8;
         public static final double DEFAULT_STAKE = 2;
     }

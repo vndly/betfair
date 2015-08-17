@@ -4,7 +4,7 @@ import com.mauriciotogneri.betfair.api.base.Enums.EventTypeEnum;
 import com.mauriciotogneri.betfair.api.base.Enums.MarketTypeEnum;
 import com.mauriciotogneri.betfair.api.base.Session;
 import com.mauriciotogneri.betfair.models.Tick;
-import com.mauriciotogneri.betfair.strategies.custom.StrategyTennisMatchOddsCustom;
+import com.mauriciotogneri.betfair.strategies.custom.StrategyTennisMatchOddsDefault;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,7 +28,7 @@ public abstract class Strategy
             case TENNIS:
                 if (marketType == MarketTypeEnum.MATCH_ODDS)
                 {
-                    return new StrategyTennisMatchOddsCustom(session, eventId, marketId, selections, folderPath);
+                    return new StrategyTennisMatchOddsDefault(session, eventId, marketId, selections, folderPath);
                 }
                 break;
         }

@@ -16,16 +16,13 @@ public abstract class StrategyTennisMatchOdds extends Strategy
     @Override
     public boolean process(Tick tick) throws Exception
     {
-        if (isMoreThan(tick.timestamp, BetRules.START_HOUR_TO_PROCESS))
+        if (isMoreThan(tick.timestamp, BetRules.MIN_HOUR_TO_PROCESS))
         {
-            if (tick.timestamp > 0)
-            {
-                Selection selectionPlayerA = tick.selections.get(0);
-                processSelection(Player.PLAYER_A, selectionPlayerA, betSimulationPlayerA, tick.timestamp);
+            Selection selectionPlayerA = tick.selections.get(0);
+            processSelection(Player.PLAYER_A, selectionPlayerA, betSimulationPlayerA, tick.timestamp);
 
-                Selection selectionPlayerB = tick.selections.get(1);
-                processSelection(Player.PLAYER_B, selectionPlayerB, betSimulationPlayerB, tick.timestamp);
-            }
+            Selection selectionPlayerB = tick.selections.get(1);
+            processSelection(Player.PLAYER_B, selectionPlayerB, betSimulationPlayerB, tick.timestamp);
 
             onTick(tick);
         }
@@ -97,8 +94,8 @@ public abstract class StrategyTennisMatchOdds extends Strategy
         boolean minPriceValueValid = priceBack >= BetRules.MIN_BACK_PRICE;
         boolean maxPriceValueValid = priceBack <= BetRules.MAX_BACK_PRICE;
         boolean maxPriceDiffValid = (priceLay / priceBack) <= BetRules.MAX_PRICE_DIFF;
-        boolean minTimeLimitValid = isMoreThan(timestamp, 0.25);
-        boolean maxTimeLimitValid = isLessThan(timestamp, 1);
+        boolean minTimeLimitValid = isMoreThan(timestamp, BetRules.MIN_HOUR_TO_BACK);
+        boolean maxTimeLimitValid = isLessThan(timestamp, BetRules.MAX_HOUR_TO_BACK);
 
         return (minPriceValueValid && maxPriceValueValid && maxPriceDiffValid && minTimeLimitValid && maxTimeLimitValid);
     }
@@ -107,10 +104,10 @@ public abstract class StrategyTennisMatchOdds extends Strategy
     {
         boolean priceLowerThanBack = priceLay < priceBack;
         boolean priceBiggerThanZero = priceLay > 0;
-        boolean isAfterHalfHour = isMoreThan(timestamp, 0.5);
+        boolean maxTimeIdealValid = isMoreThan(timestamp, BetRules.MAX_TIME_IDEAL_LAY);
         boolean idealPriceValid = priceLay <= (priceBack * BetRules.IDEAL_PRICE_FACTOR);
 
-        return (priceLowerThanBack && priceBiggerThanZero && (isAfterHalfHour || idealPriceValid));
+        return (priceLowerThanBack && priceBiggerThanZero && (maxTimeIdealValid || idealPriceValid));
     }
 
     private boolean isMoreThan(long timestamp, double hours)

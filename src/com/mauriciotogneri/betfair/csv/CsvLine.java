@@ -18,14 +18,7 @@ public class CsvLine
 
     public CsvLine appendTimestamp(long timestamp)
     {
-        if (timestamp >= 0)
-        {
-            return append(TimeUtils.getPeriod(timestamp));
-        }
-        else
-        {
-            return append("-" + TimeUtils.getPeriod(Math.abs(timestamp)));
-        }
+        return append(TimeUtils.getPeriod(timestamp));
     }
 
     public CsvLine append(String value)

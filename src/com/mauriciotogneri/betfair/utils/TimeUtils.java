@@ -1,5 +1,6 @@
 package com.mauriciotogneri.betfair.utils;
 
+import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
@@ -32,9 +33,32 @@ public class TimeUtils
 
     public static synchronized String getPeriod(long timestamp)
     {
-        Period period = new Period(timestamp);
+        if (timestamp >= 0)
+        {
+            Period period = new Period(timestamp);
 
-        return periodFormatter.print(period);
+            return periodFormatter.print(period);
+        }
+        else
+        {
+            Period period = new Period(Math.abs(timestamp));
+
+            return "-" + periodFormatter.print(period);
+        }
+    }
+
+    public static synchronized long fromPeriod(String timestamp)
+    {
+        Period period = periodFormatter.parsePeriod(timestamp);
+
+        long result = period.toDurationFrom(new DateTime(0)).getMillis();
+
+        if (timestamp.startsWith("-"))
+        {
+            result = -result;
+        }
+
+        return result;
     }
 
     private static PeriodFormatter getPeriodFormatter()
